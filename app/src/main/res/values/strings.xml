@@ -1,0 +1,19 @@
+<resources>
+    <!-- 앱 공통 -->
+    <string name="app_name">포토로그</string>
+    <string name="app_name_desc">포토로그 앱 로고(글자)</string>
+    <string name="app_logo_desc">포토로그 앱 로고</string>
+    <!-- 개별 -->
+    <string name="family_diary_author">작성자</string>
+    <string name="family_diary_title">제목</string>
+    <string name="sample_img_desc">샘플이미지</string>
+    <string name="family_diary_plus_ic">우리 가족 일기 더보기 아이콘</string>
+    <string name="diary_date_placeholder">OOOO년 00월 00일</string>
+    <string name="diary_title_placeholder">일기 제목</string>
+    <string name="diary_content_placeholder">일기 내용이 적혀 있을 곳 입니다. 짧을 수도 있고 길 수도 있습니다. 짧을 때도 왼쪽 날짜와 y축이 맞게 정렬되며, 길이가 넘치면 줄임표로 표시됩니다.</string>
+    <string name="family_diary">우리 가족 일기</string>
+    <string name="plus_sign">+</string>
+    <string name="add_diary_ic">일기 추가 버튼</string>
+    <string name="mic_button_desc">말하기 버튼</string>
+    <string name="passimage">이미지 추가 건너뛰기</string>
+</resources>

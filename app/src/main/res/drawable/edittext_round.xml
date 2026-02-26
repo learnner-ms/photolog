@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="#ffffff" /> <!-- 흰색 배경 또는 연한 크림색으로 바꿔도 됨 -->
+
+    <stroke
+        android:width="1dp"
+        android:color="#C8B29E" /> <!-- 부드러운 베이지 라인 -->
+
+    <corners android:radius="14dp" /> <!-- 둥근 모서리 -->
+
+    <padding
+        android:left="12dp"
+        android:top="8dp"
+        android:right="12dp"
+        android:bottom="8dp"/>
+</shape>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F6EBDC"
+    android:orientation="vertical"
+    android:paddingHorizontal="30dp"
+    android:layout_gravity="center_horizontal"
+    android:paddingTop="50dp">
+
+    <!-- 로고 클릭 영역 (왼쪽 정렬) -->
+    <LinearLayout
+        android:id="@+id/layout_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/paperlogy_7"
+            android:text="@string/app_name"
+            android:textColor="#5D3316"
+            android:textSize="32sp" />
+
+        <ImageView
+            android:layout_width="52sp"
+            android:layout_height="52sp"
+            android:src="@drawable/photolog_logo"
+            android:layout_margin="2dp" />
+    </LinearLayout>
+
+    <!-- BOX -->
+
+    <LinearLayout
+        android:layout_width="320dp"
+        android:layout_height="350dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/box_bg"
+        android:orientation="vertical"
+        android:gravity="center"
+        >
+        <!-- 상단 텍스트: 마이페이지 -->
+        <TextView
+            android:id="@+id/tvMyPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="마이페이지"
+            android:textSize="16sp"
+            android:textColor="#B58F74"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- 원형 프로필 -->
+        <ImageView
+            android:id="@+id/profile"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginBottom="20dp"
+
+            android:src="@drawable/profile" />
+
+        <TextView
+            android:id="@+id/tvNickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="닉네임"
+            android:textSize="22sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- 작성한 일기 수 -->
+        <TextView
+            android:id="@+id/tvDiaryCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작성한 일기 수 : n"
+            android:textSize="16sp"
+            android:textColor="#000000"/>
+
+        <!-- 추가한 가족 수 -->
+        <TextView
+            android:id="@+id/tvFamilyCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="추가한 가족 수 : n"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:layout_marginTop="5dp"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="나의 가족"
+        android:textSize="20dp"
+        android:textColor="#5D3316"
+        android:layout_marginTop="-10dp"
+        android:layout_marginBottom="10dp"
+        />
+
+    <LinearLayout
+        android:layout_width="320dp"
+        android:layout_height="154dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:padding="10dp"
+
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/family_box_1"
+            android:layout_width="130dp"
+            android:layout_height="135dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/box_bg"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/profile_family1"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="10dp"
+
+                android:src="@drawable/profile" />
+            <TextView
+                android:id="@+id/tvNickname_family1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="닉네임"
+                android:textSize="18dp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                />
+
+            <!-- 작성한 일기 수 -->
+            <TextView
+                android:id="@+id/tvDiaryCount_family1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="작성한 일기 수 : n"
+                android:textSize="14dp"
+                android:textColor="#000000"/>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/family_box_2"
+            android:layout_width="130dp"
+            android:layout_height="135dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/box_bg"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/profile_family2"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="10dp"
+
+                android:src="@drawable/profile" />
+            <TextView
+                android:id="@+id/tvNickname_family2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="닉네임"
+                android:textSize="18dp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                />
+
+            <!-- 작성한 일기 수 -->
+            <TextView
+                android:id="@+id/tvDiaryCount_family2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="작성한 일기 수 : n"
+                android:textSize="14dp"
+                android:textColor="#000000"/>
+
+            <!-- 가족 추가 버튼 (가족이 없을 때만 표시됨) -->
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_add_family"
+            android:layout_width="320dp"
+            android:layout_height="140dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/box_bg"
+            android:layout_gravity="center"
+            android:padding="20dp"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/icon_plus_shape"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="가족 추가하기"
+                android:textColor="#5D3316"
+                android:textSize="18sp"
+                android:layout_marginTop="10dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFEEE0"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="50dp">
+
+
+    <ImageView
+        android:layout_marginTop="40dp"
+        android:id="@+id/imgLogo"
+        android:layout_width="133dp"
+        android:layout_height="133dp"
+        android:src="@drawable/photolog_logo"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="포토로그"
+        android:fontFamily="@font/paperlogy_7"
+        android:textColor="#5C3A22"
+        android:textSize="35sp"
+        android:textStyle="bold"
+        android:layout_marginTop="-10dp"
+        />
+
+    <!-- 아이디 입력 -->
+    <EditText
+        android:id="@+id/etId"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="40dp"
+        android:hint="아이디"
+        android:textSize="17dp"
+        android:background="@drawable/edittext_bg"
+        android:paddingLeft="20dp"/>
+
+    <!-- 비밀번호 입력 -->
+    <EditText
+        android:id="@+id/etPw"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="15dp"
+        android:hint="비밀번호"
+        android:textSize="17dp"
+        android:inputType="textPassword"
+        android:background="@drawable/edittext_bg"
+
+        android:paddingLeft="20dp"
+        />
+
+    <!-- 오류 메시지 -->
+    <TextView
+        android:id="@+id/tvError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textColor="#8B4513"
+        android:textSize="12sp"
+        android:visibility="gone"
+        android:paddingLeft="40dp"
+        android:layout_gravity="start"
+        android:text="아이디 또는 비밀번호가 틀렸습니다."/>
+
+    <!-- 로그인 버튼 -->
+    <android.widget.Button
+        android:id="@+id/btnLogin"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/login_button_bg"
+        android:text="로그인"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp" />
+
+
+    <!-- 아이디/비밀번호 찾기 -->
+    <LinearLayout
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tvFindId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="아이디 찾기"
+            android:textSize="20sp"
+            android:textColor="#000000"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="  |  "
+            android:textColor="#000000"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvFindPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="비밀번호 찾기"
+            android:textSize="20sp"
+            android:textColor="#000000"/>
+    </LinearLayout>
+
+
+
+    <!-- 회원가입 -->
+    <TextView
+        android:id="@+id/tvJoin"
+        android:layout_width="277dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="회원가입"
+        android:textColor="#000000"
+        android:textSize="20sp" />
+</LinearLayout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 작은 말풍선 점 -->
+    <item android:gravity="bottom|left">
+        <shape android:shape="oval">
+            <size android:width="14dp" android:height="14dp"/>
+            <solid android:color="#FFEBD8"/>
+            <stroke android:width="1.2dp" android:color="#402512"/>
+        </shape>
+        <!-- 오른쪽으로 이동 시키기 -->
+        <padding android:left="6dp" android:bottom="6dp"/>
+    </item>
+
+
+    <!-- 큰 말풍선 본체 -->
+    <item android:left="10dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFEBD8"/>
+            <corners android:radius="24dp"/>
+            <stroke android:width="1.5dp" android:color="#402512"/>
+            <padding
+                android:left="10dp"
+                android:top="16dp"
+                android:right="20dp"
+                android:bottom="16dp"/>
+        </shape>
+    </item>
+
+</layer-list>

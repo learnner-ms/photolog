@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="calendar_default_text_color">#FFFFFF</color>
+    <color name="calendar_grayed_out_color">#C8C8C8</color>
+</resources>

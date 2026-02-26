@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 헤더의 배경 (살짝 안쪽으로 들어오게 inset 적용) -->
+    <item android:top="0.5dp" android:left="1dp" android:right="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#8D562F" />
+        </shape>
+    </item>
+
+    <!-- 상단 라인 제거 (테이블 외곽선이 대신 그려줌) -->
+
+    <!-- 하단 라인만 표시 -->
+    <item android:left="1dp" android:right="1dp" android:gravity="bottom">
+        <shape android:shape="rectangle">
+            <size android:height="1dp" />
+            <solid android:color="#8D562F" />
+        </shape>
+    </item>
+</layer-list>

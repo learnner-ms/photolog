@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/diary_generation"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFEEE0"
+    tools:context=".DiaryGenerationActivity">
+
+    <LinearLayout
+        android:id="@+id/layout_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:layout_margin="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <TextView
+            android:id="@+id/app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="32sp"
+            android:textColor="#5D3316"
+            android:fontFamily="@font/paperlogy_7"
+            />
+        <ImageView
+            android:id="@+id/img_logo"
+            android:layout_width="52sp"
+            android:layout_height="52sp"
+            android:src="@drawable/photolog_logo"
+            android:contentDescription="@string/app_logo_desc"
+            android:layout_margin="2dp"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_guide"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/paperlogy_7"
+        android:gravity="start"
+        android:text="오늘의 일기 생성을 위해\n오늘의 사진을 업로드 해주세요."
+        android:textColor="#5D3316"
+        android:textSize="28sp"
+        android:layout_marginHorizontal="28dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_logo"
+        />
+
+    <View
+        android:id="@+id/separator_top"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="30dp"
+        android:background="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_guide" />
+
+    <ImageView
+        android:id="@+id/img_placeholder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="H, 1:1"
+        android:src="@drawable/ic_img_placeholder"
+        android:scaleType="centerCrop"
+        android:clickable="true"
+        android:focusable="true"
+        android:adjustViewBounds="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginHorizontal="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separator_top"
+        app:layout_constraintBottom_toTopOf="@id/separator_bottom" />
+
+    <View
+        android:id="@+id/separator_bottom"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginBottom="230dp"
+        android:background="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_select_photo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/button_background"
+        android:fontFamily="@font/paperlogy_7"
+        android:paddingVertical="5dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="사진 선택"
+        android:textColor="#5D3316"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separator_bottom"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
