@@ -3,7 +3,6 @@ package com.example.photolog_front;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -11,20 +10,21 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.photolog_front.model.LoginRequest;
-import com.example.photolog_front.model.LoginResponse;
-import com.example.photolog_front.network.ApiService;
-import com.example.photolog_front.network.RetrofitClient;
+import com.example.photolog_front.db.AppDatabase;
+import com.example.photolog_front.db.UserDao;
+import com.example.photolog_front.db.UserEntity;
+import com.example.photolog_front.util.PasswordUtil;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LoginActivity extends AppCompatActivity {
 
     EditText etId, etPw;
     TextView tvError, tvJoin;
     Button btnLogin;
+
+    private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,45 +61,71 @@ public class LoginActivity extends AppCompatActivity {
 
     private void showError(String msg) {
         tvError.setText(msg);
-        tvError.setVisibility(View.VISIBLE);
+        tvError.setVisibility(TextView.VISIBLE);
     }
 
+    // 🔥 기존 Retrofit 제거 → Room 기반 로그인
     private void loginRequest(String id, String pw) {
-        LoginRequest request = new LoginRequest(id, pw);
 
-        ApiService api = RetrofitClient.getApiService(this);
-        api.login(request).enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+        btnLogin.setEnabled(false);
 
-                if (response.isSuccessful()) {
-                    LoginResponse data = response.body();
+        dbExecutor.execute(() -> {
+            try {
+                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+                UserDao userDao = db.userDao();
+
+                UserEntity user = userDao.findByUsername(id);
+
+                if (user == null) {
+                    runOnUiThread(() -> {
+                        btnLogin.setEnabled(true);
+                        showError("아이디 또는 비밀번호가 틀렸습니다.");
+                    });
+                    return;
+                }
+
+                String hashedInput = PasswordUtil.sha256(pw);
+
+                if (!hashedInput.equals(user.passwordHash)) {
+                    runOnUiThread(() -> {
+                        btnLogin.setEnabled(true);
+                        showError("아이디 또는 비밀번호가 틀렸습니다.");
+                    });
+                    return;
+                }
+
+                // ✅ 로그인 성공
+                runOnUiThread(() -> {
+                    btnLogin.setEnabled(true);
 
                     Toast.makeText(LoginActivity.this,
                             "로그인 성공!", Toast.LENGTH_SHORT).show();
 
-                    // JWT 저장 (필요하면 SharedPreferences로 저장 가능)
+                    // JWT 대신 로그인 상태 저장
                     SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
-                    prefs.edit().putString("token", response.body().getAccessToken()).apply();
+                    prefs.edit()
+                            .putBoolean("isLoggedIn", true)
+                            .putLong("currentUserId", user.id)
+                            .putString("currentUsername", user.username)
+                            .apply();
 
-
-                    // 메인 화면으로 이동
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
-                }
-                else if (response.code() == 401) {
-                    showError("아이디 또는 비밀번호가 틀렸습니다.");
-                }
-                else {
-                    showError("로그인 실패: 서버 오류("+response.code()+")");
-                }
-            }
+                });
 
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                showError("네트워크 오류 발생. 다시 시도해주세요.");
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    btnLogin.setEnabled(true);
+                    showError("로그인 처리 중 오류가 발생했습니다.");
+                });
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbExecutor.shutdown();
     }
 }

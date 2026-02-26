@@ -12,14 +12,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.photolog_front.model.SignupRequest;
-import com.example.photolog_front.model.SignupResponse;
-import com.example.photolog_front.network.ApiService;
-import com.example.photolog_front.network.RetrofitClient;
+import com.example.photolog_front.db.AppDatabase;
+import com.example.photolog_front.db.UserDao;
+import com.example.photolog_front.db.UserEntity;
+import com.example.photolog_front.util.PasswordUtil;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -27,6 +26,9 @@ public class SignupActivity extends AppCompatActivity {
     EditText signName, signId, signPwd, signPwdCheck;
     TextView tvError;
     Button btnSignup;
+
+    // Room 작업은 메인스레드에서 하면 크래시 날 수 있어서 Executor 사용
+    private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +82,7 @@ public class SignupActivity extends AppCompatActivity {
         chkAll.setChecked(allChecked);
     }
 
-    // 1단계: 입력 검증
+    // 입력 검증
     private void checkSignup() {
 
         String name = signName.getText().toString().trim();
@@ -106,7 +108,7 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        // 여기까지 통과하면 서버에 요청
+        // 여기까지 통과하면 Room에 저장
         tvError.setVisibility(View.GONE);
         requestSignup(name, id, pw);
     }
@@ -117,39 +119,60 @@ public class SignupActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    // 2단계: 서버 회원가입 요청
+    //Room 기반 회원가입(로컬 DB 저장)
     private void requestSignup(String name, String id, String pw) {
-        // API 스펙: name, username, password
-        SignupRequest request = new SignupRequest(name, id, pw);
 
-        ApiService api = RetrofitClient.getApiService(this);
-        api.signup(request).enqueue(new Callback<SignupResponse>() {
-            @Override
-            public void onResponse(Call<SignupResponse> call, Response<SignupResponse> response) {
+        // 버튼 중복 클릭 방지(선택)
+        btnSignup.setEnabled(false);
 
-                if (response.isSuccessful()) {
-                    // 200 OK
-                    Toast.makeText(SignupActivity.this,
-                            "회원가입 완료!", Toast.LENGTH_SHORT).show();
+        dbExecutor.execute(() -> {
+            try {
+                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+                UserDao userDao = db.userDao();
+
+                // 1) 아이디 중복 체크
+                UserEntity existing = userDao.findByUsername(id);
+                if (existing != null) {
+                    runOnUiThread(() -> {
+                        btnSignup.setEnabled(true);
+                        showError("이미 존재하는 아이디입니다.");
+                    });
+                    return;
+                }
+
+                // 2) 저장할 사용자 생성
+                UserEntity user = new UserEntity();
+                user.name = name;
+                user.username = id;
+                user.passwordHash = PasswordUtil.sha256(pw); // 해시 저장
+                user.createdAt = System.currentTimeMillis();
+
+                // 3) DB insert
+                userDao.insert(user);
+
+                // 4) 성공 처리 (UI 스레드)
+                runOnUiThread(() -> {
+                    btnSignup.setEnabled(true);
+                    Toast.makeText(SignupActivity.this, "회원가입 완료!", Toast.LENGTH_SHORT).show();
 
                     // 로그인 페이지로 이동
                     Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
-                    // 필요하면 회원정보 넘겨도 됨
                     startActivity(intent);
                     finish();
+                });
 
-                } else if (response.code() == 422) {
-                    // Validation Error
-                    showError("회원가입 실패: 입력값을 다시 확인해주세요.");
-                } else {
-                    showError("회원가입 실패: 서버 오류(" + response.code() + ")");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<SignupResponse> call, Throwable t) {
-                showError("네트워크 오류가 발생했습니다.\n다시 시도해주세요.");
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    btnSignup.setEnabled(true);
+                    showError("회원가입 실패: " + e.getMessage());
+                });
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbExecutor.shutdown();
     }
 }
