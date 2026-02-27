@@ -1,7 +1,6 @@
 package com.example.photolog_front;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -17,12 +16,17 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import com.example.photolog_front.db.AppDatabase;
+import com.example.photolog_front.db.DiaryDao;
+import com.example.photolog_front.db.DiaryEntity;
 import com.example.photolog_front.model.FamilyCommentRequest;
 import com.example.photolog_front.model.FamilyCommentResponse;
 import com.example.photolog_front.network.ApiService;
 import com.example.photolog_front.network.RetrofitClient;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,13 +36,27 @@ public class FamilyDiaryDetailActivity extends AppCompatActivity {
 
     private ImageView imgDiary;
     private TextView tvTitle, tvInfo, tvContent;
+
     private LinearLayout commentContainer;
     private TextView tvNoComment;
     private EditText etComment;
     private View btnSend;
 
+    // ✅ 댓글 UI 전체 제어용
+    private View tvCommentHeader;
+    private View viewCommentDivider;
+    private View commentArea;
+    private View commentInputLayout;
+
     private ApiService api;
     private int postId;
+
+    // ✅ Room
+    private AppDatabase db;
+    private DiaryDao diaryDao;
+
+    // ✅ Thread
+    private final ExecutorService io = Executors.newSingleThreadExecutor();
 
     private static final String DEFAULT_HINT = "댓글을 입력하세요";
 
@@ -47,36 +65,71 @@ public class FamilyDiaryDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_family_diary_detail);
 
+        // ---------- View binding ----------
         imgDiary = findViewById(R.id.img_diary);
         tvTitle = findViewById(R.id.tv_title);
         tvInfo = findViewById(R.id.tv_info);
         tvContent = findViewById(R.id.tv_content);
+
         commentContainer = findViewById(R.id.comment_container);
         tvNoComment = findViewById(R.id.tv_no_comment);
         etComment = findViewById(R.id.et_comment);
         btnSend = findViewById(R.id.btn_send);
 
+        // ✅ XML에 id 추가해둔 상태여야 함
+        tvCommentHeader = findViewById(R.id.tv_comment_header);
+        viewCommentDivider = findViewById(R.id.view_comment_divider);
+        commentArea = findViewById(R.id.comment_area);
+        commentInputLayout = findViewById(R.id.layout_comment_input);
+
+        findViewById(R.id.btn_back_to_list).setOnClickListener(v -> finish());
+
+        // ---------- init ----------
         api = RetrofitClient.getApiService(this);
+
+        // ✅ Room init
+        db = AppDatabase.getInstance(getApplicationContext());
+        diaryDao = db.diaryDao();
+
+        // ---------- mode ----------
         postId = getIntent().getIntExtra("post_id", -1);
 
-        if (postId == -1) {
-            Toast.makeText(this, "게시물을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+        if (postId <= 0) {
+            // =========================================================
+            // ✅ 로컬 일기 모드: diary_id로 Room에서 로드
+            // =========================================================
+            hideCommentUi();
+
+            long diaryId = getIntent().getLongExtra("diary_id", -1L);
+            if (diaryId <= 0) {
+                Toast.makeText(this, "로컬 일기 ID가 없습니다.", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+
+            loadLocalDiaryFromRoom(diaryId);
+            return; // ⛔ 서버 댓글 로직 절대 실행 X
+        }
+
+        // =========================================================
+        // ✅ 서버 게시글 모드: 기존대로 Serializable diary로 표시
+        // =========================================================
+        showCommentUi();
+
+        Diary diary = (Diary) getIntent().getSerializableExtra("diary");
+        if (diary == null) {
+            Toast.makeText(this, "일기 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        Diary diary = (Diary) getIntent().getSerializableExtra("diary");
-
-        tvTitle.setText(diary.getTitle());
-        tvInfo.setText(diary.getAuthor() + " | " + diary.getDate());
-        tvContent.setText(diary.getContent());
-
-        if (diary.getImageUri() != null)
-            imgDiary.setImageURI(Uri.parse(diary.getImageUri()));
-        else if (diary.getImageRes() != 0)
-            imgDiary.setImageResource(diary.getImageRes());
-
-        findViewById(R.id.btn_back_to_list).setOnClickListener(v -> finish());
+        bindDiaryToUi(
+                diary.getAuthor(),
+                diary.getTitle(),
+                diary.getContent(),
+                diary.getDate(),
+                diary.getImageUri()
+        );
 
         // 댓글 불러오기
         loadComments();
@@ -85,16 +138,68 @@ public class FamilyDiaryDetailActivity extends AppCompatActivity {
         btnSend.setOnClickListener(v -> submitComment());
 
         // 팝업 입력창 열기
-        etComment.setOnClickListener(v -> {
-            showCommentDialog("댓글 달기", etComment.getText().toString());
+        etComment.setOnClickListener(v -> showCommentDialog("댓글 달기", etComment.getText().toString()));
+    }
+
+    private void loadLocalDiaryFromRoom(long diaryId) {
+        io.execute(() -> {
+            DiaryEntity entity = diaryDao.getDiaryById(diaryId);
+
+            runOnUiThread(() -> {
+                if (entity == null) {
+                    Toast.makeText(this, "일기를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
+
+                // author는 로컬이면 "나"로 고정(원하면 username으로 바꿀 수 있음)
+                bindDiaryToUi(
+                        "나",
+                        entity.title,
+                        entity.content,
+                        entity.dateText,
+                        entity.photoUri
+                );
+            });
         });
+    }
+
+    private void bindDiaryToUi(String author, String title, String content, String dateText, String photoUri) {
+        tvTitle.setText(title != null ? title : "");
+        tvInfo.setText((author != null ? author : "") + " | " + (dateText != null ? dateText : ""));
+        tvContent.setText(content != null ? content : "");
+
+        if (photoUri != null && !photoUri.trim().isEmpty()) {
+            try {
+                imgDiary.setImageURI(Uri.parse(photoUri));
+            } catch (Exception e) {
+                // 필요하면 기본 이미지로 fallback
+                // imgDiary.setImageResource(R.drawable.sample);
+            }
+        } else {
+            // 필요하면 기본 이미지
+            // imgDiary.setImageResource(R.drawable.sample);
+        }
+    }
+
+    private void hideCommentUi() {
+        if (tvCommentHeader != null) tvCommentHeader.setVisibility(View.GONE);
+        if (viewCommentDivider != null) viewCommentDivider.setVisibility(View.GONE);
+        if (commentArea != null) commentArea.setVisibility(View.GONE);
+        if (commentInputLayout != null) commentInputLayout.setVisibility(View.GONE);
+    }
+
+    private void showCommentUi() {
+        if (tvCommentHeader != null) tvCommentHeader.setVisibility(View.VISIBLE);
+        if (viewCommentDivider != null) viewCommentDivider.setVisibility(View.VISIBLE);
+        if (commentArea != null) commentArea.setVisibility(View.VISIBLE);
+        if (commentInputLayout != null) commentInputLayout.setVisibility(View.VISIBLE);
     }
 
     // -------------------------
     // 댓글 입력 팝업
     // -------------------------
     private void showCommentDialog(String title, String defaultText) {
-
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_custom, null);
         TextView tvDialogTitle = dialogView.findViewById(R.id.tv_dialog_title);
         EditText etInput = dialogView.findViewById(R.id.et_dialog_input);
@@ -122,7 +227,9 @@ public class FamilyDiaryDetailActivity extends AppCompatActivity {
             dialog.dismiss();
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
         dialog.show();
     }
 
@@ -168,7 +275,7 @@ public class FamilyDiaryDetailActivity extends AppCompatActivity {
         String text = etComment.getText().toString().trim();
 
         if (text.isEmpty()) {
-            Toast.makeText(this, "댓글을 입력하세요.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, DEFAULT_HINT, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -228,5 +335,11 @@ public class FamilyDiaryDetailActivity extends AppCompatActivity {
 
     private int dpToPx(int dp) {
         return Math.round(dp * getResources().getDisplayMetrics().density);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        io.shutdown();
     }
 }

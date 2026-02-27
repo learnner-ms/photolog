@@ -43,7 +43,7 @@ public class MyDiaryActivity extends AppCompatActivity {
         api = RetrofitClient.getApiService(this);
 
         initViews();
-        // 🔥 로고 클릭하면 MainActivity로 이동
+        // 로고 클릭하면 MainActivity로 이동
         findViewById(R.id.layout_logo).setOnClickListener(v -> {
             Intent intent = new Intent(MyDiaryActivity.this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);

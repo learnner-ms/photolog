@@ -135,6 +135,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
+                android:id="@+id/tv_comment_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="댓글"
@@ -146,6 +147,7 @@
                 android:paddingTop="24dp" />
 
             <View
+                android:id="@+id/view_comment_divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#D0BFAF"

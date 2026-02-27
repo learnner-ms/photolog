@@ -2,6 +2,7 @@ package com.example.photolog_front;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -14,9 +15,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import com.example.photolog_front.db.AppDatabase;
+import com.example.photolog_front.db.DiaryDao;
+import com.example.photolog_front.db.DiaryEntity;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DiaryResultActivity extends AppCompatActivity {
 
@@ -24,8 +31,11 @@ public class DiaryResultActivity extends AppCompatActivity {
     private TextView tvTitle, tvDate;
     private EditText etContent;
     private AppCompatButton btnEdit, btnDone, btnRetry;
+
     private Uri photoUri;
     private String diaryTitle, diaryContent;
+
+    private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,45 +69,77 @@ public class DiaryResultActivity extends AppCompatActivity {
         if (diaryTitle != null) tvTitle.setText(diaryTitle);
         if (diaryContent != null) etContent.setText(diaryContent);
 
-        String currentDate = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault()).format(new Date());
+        String currentDate = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
+                .format(new Date());
         tvDate.setText(currentDate);
 
         // 수정하기 → 팝업 열기
-        btnEdit.setOnClickListener(v -> {
-            showCustomDiaryEditDialog(etContent.getText().toString());
-        });
+        btnEdit.setOnClickListener(v -> showCustomDiaryEditDialog(etContent.getText().toString()));
 
         // 로고 클릭 → 나가기 확인 다이얼로그
         findViewById(R.id.layout_logo).setOnClickListener(v -> showExitConfirmDialog());
 
-        // 완료 버튼 → 메인으로 이동 + 저장
-        btnDone.setOnClickListener(v -> {
-
-            String finalTitle = tvTitle.getText().toString();
-            String finalContent = etContent.getText().toString();
-            String finalDate = tvDate.getText().toString();
-            String finalPhotoUri = (photoUri != null ? photoUri.toString() : null);
-
-            Diary diary = new Diary(
-                    "한민선", // TODO: 로그인 사용자 이름으로 변경 예정
-                    finalTitle,
-                    finalContent,
-                    finalPhotoUri,
-                    finalDate
-            );
-
-            DiaryRepository.getInstance().addDiary(diary);
-
-            Toast.makeText(this, "일기가 저장되었습니다!", Toast.LENGTH_SHORT).show();
-
-            Intent mainIntent = new Intent(this, MainActivity.class);
-            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(mainIntent);
-            finish();
-        });
+        // ✅ 완료 버튼 → Room 저장 후 메인 이동
+        btnDone.setOnClickListener(v -> saveDiaryToRoomAndGoMain());
 
         // 다시 작성 버튼
         btnRetry.setOnClickListener(v -> showRetryDialog());
+    }
+
+    private void saveDiaryToRoomAndGoMain() {
+
+        // 연타 방지
+        btnDone.setEnabled(false);
+
+        String finalTitle = tvTitle.getText().toString();
+        String finalContent = etContent.getText().toString();
+        String finalDate = tvDate.getText().toString();
+        String finalPhotoUri = (photoUri != null ? photoUri.toString() : null);
+
+        // ✅ 로그인 사용자 정보 가져오기
+        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
+        long userId = prefs.getLong("currentUserId", -1);
+        String username = prefs.getString("currentUsername", null);
+
+        if (userId == -1) {
+            btnDone.setEnabled(true);
+            Toast.makeText(this, "로그인 정보가 없습니다. 다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+
+        dbExecutor.execute(() -> {
+            try {
+                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+                DiaryDao diaryDao = db.diaryDao();
+
+                DiaryEntity entity = new DiaryEntity();
+                entity.userId = userId;
+                entity.title = finalTitle;
+                entity.content = finalContent;
+                entity.dateText = finalDate;
+                entity.photoUri = finalPhotoUri;
+                entity.createdAt = System.currentTimeMillis();
+
+                diaryDao.insert(entity);
+
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "일기가 저장되었습니다!", Toast.LENGTH_SHORT).show();
+
+                    Intent mainIntent = new Intent(this, MainActivity.class);
+                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(mainIntent);
+                    finish();
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    btnDone.setEnabled(true);
+                    Toast.makeText(this, "저장 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
     // CUSTOM DIARY EDIT POPUP (핵심 추가 부분)
@@ -134,10 +176,11 @@ public class DiaryResultActivity extends AppCompatActivity {
             dialog.dismiss();
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
         dialog.show();
     }
-
 
     // 기존 다이얼로그들 (나가기 / 다시작성)
     private void showExitConfirmDialog() {
@@ -146,7 +189,9 @@ public class DiaryResultActivity extends AppCompatActivity {
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         AppCompatButton btnNo = dialogView.findViewById(R.id.btn_no);
         AppCompatButton btnYes = dialogView.findViewById(R.id.btn_yes);
@@ -179,7 +224,9 @@ public class DiaryResultActivity extends AppCompatActivity {
             showRetryOptions();
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
         dialog.show();
     }
 
@@ -217,7 +264,15 @@ public class DiaryResultActivity extends AppCompatActivity {
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
         dialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dbExecutor.shutdown();
     }
 }
