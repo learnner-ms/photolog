@@ -12,4 +12,10 @@ public interface UserDao {
 
     @Query("SELECT * FROM users WHERE username = :username LIMIT 1")
     UserEntity findByUsername(String username);
+
+    @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
+    UserEntity findById(long id);
+
+    @Query("DELETE FROM users WHERE id = :id")
+    void deleteById(long id);
 }

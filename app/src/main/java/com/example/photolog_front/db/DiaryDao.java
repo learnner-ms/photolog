@@ -24,4 +24,6 @@ public interface DiaryDao {
 
     @Query("DELETE FROM diaries WHERE userId = :userId")
     void deleteAllByUser(long userId);
+    @Query("SELECT COUNT(*) FROM diaries WHERE userId = :userId")
+    int countByUserId(long userId);
 }

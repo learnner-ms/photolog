@@ -94,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                // ✅ 로그인 성공
+                // 로그인 성공
                 runOnUiThread(() -> {
                     btnLogin.setEnabled(true);
 
@@ -105,8 +105,8 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
                     prefs.edit()
                             .putBoolean("isLoggedIn", true)
-                            .putLong("currentUserId", user.id)
-                            .putString("currentUsername", user.username)
+                            .putLong("userId", user.id)
+                            .putString("username", user.username)
                             .apply();
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
