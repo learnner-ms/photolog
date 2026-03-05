@@ -9,8 +9,6 @@
     android:background="#FFEEE0"
     tools:context=".DiaryResultActivity">
 
-
-
     <!-- 상단 로고 -->
     <LinearLayout
         android:id="@+id/layout_logo"

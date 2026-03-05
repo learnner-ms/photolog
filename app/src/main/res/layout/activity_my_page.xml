@@ -1,380 +1,384 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scroll_mypage"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mypage_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F6EBDC"
-    android:fillViewport="true">
-
+    android:orientation="vertical">
+    <!--  고정 헤더: 공통 로고 + 오른쪽 액션버튼 -->
     <LinearLayout
-        android:id="@+id/root_container"
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:paddingTop="40dp"
-        android:paddingBottom="40dp">
+        android:paddingBottom="10dp"
+        android:paddingHorizontal="24dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <!-- 상단바: 로고 + 오른쪽 액션버튼 -->
+        <!-- 공통 로고 영역 (왼쪽) -->
         <LinearLayout
-            android:id="@+id/top_bar"
-            android:layout_width="match_parent"
+            android:id="@+id/layout_logo"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
-                android:id="@+id/layout_logo"
+            <TextView
+                android:id="@+id/app_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/paperlogy_7"
-                    android:text="@string/app_name"
-                    android:textColor="#5D3316"
-                    android:textSize="28sp" />
-
-                <ImageView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_marginStart="6dp"
-                    android:src="@drawable/photolog_logo" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <!-- 오른쪽 액션 버튼 (상태에 따라 텍스트/기능 바꿈) -->
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_top_action"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:minHeight="36dp"
-                android:paddingHorizontal="14dp"
-                android:text="요청 관리"
-                android:textSize="14sp"
+                android:text="@string/app_name"
+                android:contentDescription="@string/app_name_desc"
+                android:textSize="32sp"
                 android:textColor="#5D3316"
-                android:background="@drawable/button_background"
-                android:visibility="gone" />
+                android:fontFamily="@font/paperlogy_7" />
+
+            <ImageView
+                android:id="@+id/img_logo"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:src="@drawable/photolog_logo"
+                android:contentDescription="@string/app_logo_desc"
+                android:layout_marginStart="2dp" />
         </LinearLayout>
 
-        <!-- 상단 실선 -->
+        <!-- spacer (오른쪽 버튼 밀어냄) -->
         <View
-            android:id="@+id/view_top_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="10dp"
-            android:background="#5D3316" />
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-        <!-- ✅ 디버그: 그룹 상태 토글 버튼(테스트용) -->
+        <!-- 오른쪽: 액션 버튼 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_top_action"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:minHeight="36dp"
+            android:paddingHorizontal="14dp"
+            android:text="요청 관리"
+            android:fontFamily="@font/paperlogy_7"
+            android:textSize="30sp"
+            android:textColor="#5D3316"
+            android:background="@drawable/button_background"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- 아래만 스크롤 -->
+    <ScrollView
+        android:id="@+id/scroll_mypage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
         <LinearLayout
-            android:id="@+id/debug_state_bar"
+            android:id="@+id/root_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="6dp"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:visibility="visible">
+            android:orientation="vertical"
+            android:paddingBottom="40dp">
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_debug_none"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="NONE"
-                android:textSize="12sp"
-                android:background="@drawable/button_background"
-                android:textColor="#5D3316"/>
+            <!-- 상단 실선 (여기부터 스크롤 시작) -->
+            <View
+                android:id="@+id/view_top_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#5D3316" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_debug_owner"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:text="OWNER"
-                android:textSize="12sp"
-                android:background="@drawable/button_background"
-                android:textColor="#5D3316"/>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_debug_member"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:text="MEMBER"
-                android:textSize="12sp"
-                android:background="@drawable/button_background"
-                android:textColor="#5D3316"/>
-        </LinearLayout>
-
-        <!-- 프로필 카드(마이페이지 박스) -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="16dp">
-
+            <!-- 프로필 카드(마이페이지 박스) -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="340dp"
-                android:background="@drawable/box_bg"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/box_bg"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvMyPage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="마이페이지"
+                        android:fontFamily="@font/paperlogy_6"
+                        android:textSize="20sp"
+                        android:textColor="#A16D49"
+                        android:layout_marginBottom="12dp" />
+
+                    <ImageView
+                        android:id="@+id/profile"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:src="@drawable/profile"
+                        android:layout_marginBottom="10dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        />
+
+                    <TextView
+                        android:id="@+id/tvNickname"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/paperlogy_6"
+                        android:text="닉네임"
+                        android:textSize="30sp"
+                        android:textColor="#5D3316"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvDiaryCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/paperlogy_6"
+                        android:textSize="20sp"
+                        android:text="작성한 일기 수 : n"
+                        android:textColor="#5D3316"
+                        />
+
+                    <TextView
+                        android:id="@+id/tvFamilyCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="추가한 가족 수 : n"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/paperlogy_6"
+                        android:textColor="#5D3316"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 상태 A: 그룹 없음 -->
+            <LinearLayout
+                android:id="@+id/section_no_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="16dp"
                 android:orientation="vertical"
-                android:gravity="center"
-                android:padding="16dp">
+                android:gravity="center_horizontal"
+                android:visibility="gone">
 
                 <TextView
-                    android:id="@+id/tvMyPage"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tv_no_group_msg"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="마이페이지"
-                    android:textSize="14sp"
-                    android:textColor="#B58F74"
-                    android:layout_marginBottom="12dp" />
-
-                <ImageView
-                    android:id="@+id/profile"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:src="@drawable/profile"
+                    android:text="아직 가족 그룹이 없습니다.\n그룹에 가입해보세요."
+                    android:textColor="#5D3316"
+                    android:textSize="28sp"
+                    android:fontFamily="@font/paperlogy_7"
+                    android:textStyle="bold"
+                    android:gravity="center"
                     android:layout_marginBottom="14dp" />
 
-                <TextView
-                    android:id="@+id/tvNickname"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="닉네임"
-                    android:textSize="22sp"
-                    android:textColor="#000000"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/tvDiaryCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="작성한 일기 수 : n"
-                    android:textSize="15sp"
-                    android:textColor="#000000" />
-
-                <TextView
-                    android:id="@+id/tvFamilyCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="추가한 가족 수 : n"
-                    android:textSize="15sp"
-                    android:textColor="#000000"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 상태 A: 그룹 없음 -->
-        <LinearLayout
-            android:id="@+id/section_no_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="16dp"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/tv_no_group_msg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="아직 가족 그룹이 없습니다.\n그룹에 가입해보세요."
-                android:textColor="#5D3316"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="14dp" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_join_group"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="그룹 참여하기"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/login_button_bg" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_create_group"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="10dp"
-                android:text="그룹 생성하기"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/login_button_bg" />
-        </LinearLayout>
-
-        <!-- 상태 B/C: 나의 그룹 섹션 (생성자/참여자 공통) -->
-        <LinearLayout
-            android:id="@+id/section_my_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="16dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="나의 그룹"
-                android:textColor="#5D3316"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp"
-                android:layout_gravity="center_horizontal"/>
-
-            <!-- 멤버 카드 영역(지금은 2개만 예시로 두고, 나중에 동적으로 추가 가능) -->
-            <LinearLayout
-                android:id="@+id/layout_members_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:paddingBottom="8dp">
-
-                <LinearLayout
-                    android:id="@+id/member_box_1"
-                    android:layout_width="0dp"
-                    android:layout_height="140dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/box_bg"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="10dp"
-                    android:layout_marginEnd="8dp">
-
-                    <ImageView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:src="@drawable/profile"
-                        android:layout_marginBottom="8dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_member_name_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="김성신"
-                        android:textStyle="bold"
-                        android:textColor="#5D3316"/>
-
-                    <TextView
-                        android:id="@+id/tv_member_diary_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="작성한 일기 수 : n"
-                        android:textColor="#5D3316"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/member_box_2"
-                    android:layout_width="0dp"
-                    android:layout_height="140dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/box_bg"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="10dp"
-                    android:layout_marginStart="8dp">
-
-                    <ImageView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:src="@drawable/profile"
-                        android:layout_marginBottom="8dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_member_name_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="김성신"
-                        android:textStyle="bold"
-                        android:textColor="#5D3316"/>
-
-                    <TextView
-                        android:id="@+id/tv_member_diary_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="작성한 일기 수 : n"
-                        android:textColor="#5D3316"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- “실선 밑 부분” (여기부터 스크롤 내려서 개인정보 보호 박스) -->
-        <View
-            android:id="@+id/view_bottom_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="12dp"
-            android:background="#5D3316" />
-
-        <!-- 개인정보 보호 박스: 항상 맨 아래 -->
-        <LinearLayout
-            android:id="@+id/privacy_box"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/box_bg"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="개인정보 보호"
-                    android:textColor="#5D3316"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_privacy_desc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="데이터 삭제 및 탈퇴를 진행할 수 있어요."
-                    android:textColor="#6A3E20"
-                    android:textSize="14sp" />
-
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_delete_ai_data"
+                    android:id="@+id/btn_join_group"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="AI 및 개인정보 전체 삭제"
+                    android:text="그룹 참여하기"
+                    android:fontFamily="@font/paperlogy_7"
+                    android:textSize="22sp"
                     android:textColor="#FFFFFF"
                     android:background="@drawable/login_button_bg" />
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_withdraw"
+                    android:id="@+id/btn_create_group"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="10dp"
-                    android:text="회원 탈퇴"
+                    android:text="그룹 생성하기"
+                    android:textSize="22sp"
+                    android:fontFamily="@font/paperlogy_7"
                     android:textColor="#FFFFFF"
                     android:background="@drawable/login_button_bg" />
             </LinearLayout>
-        </LinearLayout>
 
-    </LinearLayout>
-</ScrollView>
+            <!-- 상태 B/C: 나의 그룹 섹션 -->
+            <LinearLayout
+                android:id="@+id/section_my_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="16dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="나의 그룹"
+                    android:textColor="#A16D49"
+                    android:fontFamily="@font/paperlogy_6"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="10dp"
+                    android:layout_gravity="center_horizontal" />
+
+                <LinearLayout
+                    android:id="@+id/layout_members_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingBottom="8dp">
+
+                    <!-- member_box_1 / member_box_2 그대로 유지 -->
+                    <LinearLayout
+                        android:id="@+id/member_box_1"
+                        android:layout_width="0dp"
+                        android:layout_height="140dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/box_bg"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:layout_marginEnd="8dp">
+
+                        <ImageView
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:src="@drawable/profile"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/tv_member_name_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="김성신"
+                            android:fontFamily="@font/paperlogy_6"
+                            android:textSize="20sp"
+                            android:textColor="#5D3316" />
+
+                        <TextView
+                            android:id="@+id/tv_member_diary_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="작성한 일기 수 : n"
+                            android:fontFamily="@font/paperlogy_6"
+                            android:textColor="#5D3316"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/member_box_2"
+                        android:layout_width="0dp"
+                        android:layout_height="140dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/box_bg"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:layout_marginStart="8dp">
+
+                        <ImageView
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:src="@drawable/profile"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/tv_member_name_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="김성신"
+                            android:fontFamily="@font/paperlogy_6"
+                            android:textSize="20sp"
+                            android:textColor="#5D3316" />
+
+                        <TextView
+                            android:id="@+id/tv_member_diary_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="작성한 일기 수 : n"
+                            android:fontFamily="@font/paperlogy_6"
+                            android:textColor="#5D3316"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- “실선 밑 부분” -->
+            <View
+                android:id="@+id/view_bottom_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="30dp"
+                android:background="#5D3316" />
+
+            <!-- 개인정보 보호 박스 -->
+            <LinearLayout
+                android:id="@+id/privacy_box"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="30dp"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/box_bg"
+                    android:orientation="vertical"
+                    android:padding="10sp">
+
+                    <TextView
+                        android:layout_marginStart="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="개인정보 보호"
+                        android:textColor="#5D3316"
+                        android:textSize="27sp"
+                        android:fontFamily="@font/paperlogy_7"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_marginStart="10dp"
+                        android:id="@+id/tv_privacy_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5sp"
+                        android:fontFamily="@font/paperlogy_5"
+                        android:text="데이터 삭제 및 탈퇴를 진행할 수 있어요."
+                        android:textColor="#6A3E20"
+                        android:textSize="20sp" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_delete_ai_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp"
+                        android:text="AI 및 개인정보 전체 삭제"
+                        android:textSize="22sp"
+                        android:fontFamily="@font/paperlogy_7"
+                        android:textColor="#FFFFFF"
+                        android:background="@drawable/login_button_bg"
+                        app:backgroundTint="#8C4E2E"
+                        />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_withdraw"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="10dp"
+                        android:textSize="22sp"
+                        android:text="회원 탈퇴"
+                        android:fontFamily="@font/paperlogy_7"
+                        android:textColor="#FFFFFF"
+                        android:background="@drawable/login_button_bg"
+                        app:backgroundTint="#6F3B20"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#66000000">
+
+    <!-- 가운데 카드 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/dialog_notice_bg"
+        android:padding="18dp">
+
+        <!-- 제목 -->
+        <TextView
+            android:id="@+id/tv_notice_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="AI 일기 데이터 삭제 안내"
+            android:textSize="32sp"
+            android:textColor="#5D3316"
+            android:fontFamily="@font/paperlogy_7"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:paddingBottom="10dp"/>
+
+        <!-- 실선 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5dp"
+            android:background="#8B5A2B"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 내용 -->
+        <TextView
+            android:id="@+id/tv_notice_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textColor="#5D3316"
+            android:fontFamily="@font/paperlogy_6"
+            android:lineSpacingExtra="6dp"
+            android:paddingBottom="14dp"/>
+
+        <!-- 실선 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1.5dp"
+            android:background="#8B5A2B"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 체크 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="14dp">
+
+            <CheckBox
+                android:id="@+id/cb_notice_agree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#5D3316"/>
+
+            <TextView
+                android:id="@+id/tv_notice_agree"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:textSize="24sp"
+                android:textColor="#5D3316"
+                android:fontFamily="@font/paperlogy_6"/>
+        </LinearLayout>
+
+        <!-- 삭제 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_notice_primary"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:textSize="34sp"
+            android:textColor="#5D3316"
+            android:fontFamily="@font/paperlogy_7"
+            android:background="@drawable/button_background"
+            android:enabled="false"/>
+
+        <!-- 취소 -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_notice_secondary"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
+            android:text="취소"
+            android:textSize="34sp"
+            android:textColor="#5D3316"
+            android:fontFamily="@font/paperlogy_7"
+            android:background="@drawable/button_background"/>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -6,23 +6,24 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.photolog_front.db.AppDatabase;
 import com.example.photolog_front.db.UserDao;
 import com.example.photolog_front.db.UserEntity;
 import com.example.photolog_front.util.PasswordUtil;
+import com.example.photolog_front.util.PrefsKeys;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText etId, etPw;
-    TextView tvError, tvJoin;
-    Button btnLogin;
+    private EditText etId, etPw;
+    private TextView tvError, tvJoin;
+    private Button btnLogin;
 
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
@@ -37,13 +38,11 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         tvJoin = findViewById(R.id.tvJoin);
 
-        // 회원가입 이동
         tvJoin.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
             startActivity(intent);
         });
 
-        // 로그인 버튼 클릭
         btnLogin.setOnClickListener(v -> attemptLogin());
     }
 
@@ -64,9 +63,13 @@ public class LoginActivity extends AppCompatActivity {
         tvError.setVisibility(TextView.VISIBLE);
     }
 
-    // 🔥 기존 Retrofit 제거 → Room 기반 로그인
-    private void loginRequest(String id, String pw) {
+    private void hideError() {
+        tvError.setText("");
+        tvError.setVisibility(TextView.GONE);
+    }
 
+    // Room 기반 로그인
+    private void loginRequest(String id, String pw) {
         btnLogin.setEnabled(false);
 
         dbExecutor.execute(() -> {
@@ -94,19 +97,17 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                // 로그인 성공
+                // 로그인 성공 처리
                 runOnUiThread(() -> {
                     btnLogin.setEnabled(true);
+                    hideError();
 
-                    Toast.makeText(LoginActivity.this,
-                            "로그인 성공!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "로그인 성공!", Toast.LENGTH_SHORT).show();
 
-                    // JWT 대신 로그인 상태 저장
-                    SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
+                    SharedPreferences prefs = getSharedPreferences(PrefsKeys.PREFS_AUTH, MODE_PRIVATE);
                     prefs.edit()
-                            .putBoolean("isLoggedIn", true)
-                            .putLong("userId", user.id)
-                            .putString("username", user.username)
+                            .putLong(PrefsKeys.KEY_CURRENT_USER_ID, user.id)
+                            .putString(PrefsKeys.KEY_CURRENT_USERNAME, user.username)
                             .apply();
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);

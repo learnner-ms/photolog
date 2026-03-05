@@ -22,12 +22,11 @@ import java.util.concurrent.Executors;
 
 public class SignupActivity extends AppCompatActivity {
 
-    CheckBox chkAll, chkUse, chkPrivacy, chkAd;
-    EditText signName, signId, signPwd, signPwdCheck;
-    TextView tvError;
-    Button btnSignup;
+    private CheckBox chkAll, chkUse, chkPrivacy, chkAd;
+    private EditText signName, signId, signPwd, signPwdCheck;
+    private TextView tvError;
+    private Button btnSignup;
 
-    // Room 작업은 메인스레드에서 하면 크래시 날 수 있어서 Executor 사용
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -35,22 +34,17 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        // 체크박스
         chkAll = findViewById(R.id.chkAll);
         chkUse = findViewById(R.id.chkUse);
         chkPrivacy = findViewById(R.id.chkPrivacy);
         chkAd = findViewById(R.id.chkAd);
 
-        // 입력칸
         signName = findViewById(R.id.signName);
         signId = findViewById(R.id.signId);
         signPwd = findViewById(R.id.signPwd);
         signPwdCheck = findViewById(R.id.signPwdCheck);
 
-        // 에러 문구
         tvError = findViewById(R.id.tvError);
-
-        // 회원가입 버튼
         btnSignup = findViewById(R.id.btnSignup);
 
         // 로고 클릭 → 로그인 이동
@@ -59,10 +53,13 @@ public class SignupActivity extends AppCompatActivity {
             Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
+            finish();
         });
 
         // 전체 선택
         chkAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // 개별 체크가 바뀔 때 chkAll도 바뀌므로, 불필요한 연쇄를 막고 싶으면
+            // 여기서만 setChecked하고, updateAllChecked에서는 chkAll을 직접 건드리지 않아도 됨.
             chkUse.setChecked(isChecked);
             chkPrivacy.setChecked(isChecked);
             chkAd.setChecked(isChecked);
@@ -72,44 +69,38 @@ public class SignupActivity extends AppCompatActivity {
         chkPrivacy.setOnCheckedChangeListener((b, c) -> updateAllChecked());
         chkAd.setOnCheckedChangeListener((b, c) -> updateAllChecked());
 
-        // 회원가입 버튼 클릭
         btnSignup.setOnClickListener(v -> checkSignup());
     }
 
-    // 전체 체크 업데이트
     private void updateAllChecked() {
         boolean allChecked = chkUse.isChecked() && chkPrivacy.isChecked() && chkAd.isChecked();
-        chkAll.setChecked(allChecked);
+        // 무한 루프는 발생하지 않지만, 깔끔하게 유지
+        if (chkAll.isChecked() != allChecked) chkAll.setChecked(allChecked);
     }
 
-    // 입력 검증
     private void checkSignup() {
-
         String name = signName.getText().toString().trim();
         String id = signId.getText().toString().trim();
-        String pw = signPwd.getText().toString().trim();
-        String pwCheck = signPwdCheck.getText().toString().trim();
+        String pw = signPwd.getText().toString();
+        String pwCheck = signPwdCheck.getText().toString();
 
-        // 빈칸 체크
         if (name.isEmpty() || id.isEmpty() || pw.isEmpty() || pwCheck.isEmpty()) {
             showError("모든 칸을 채워주세요!");
             return;
         }
 
-        // 비밀번호 일치 확인
         if (!pw.equals(pwCheck)) {
             showError("비밀번호가 일치하지 않습니다.");
             return;
         }
 
-        // 필수 약관 체크
+        // 필수 약관 체크 (use / privacy)
         if (!chkUse.isChecked() || !chkPrivacy.isChecked()) {
             showError("필수 약관에 동의해야 합니다.");
             return;
         }
 
-        // 여기까지 통과하면 Room에 저장
-        tvError.setVisibility(View.GONE);
+        hideError();
         requestSignup(name, id, pw);
     }
 
@@ -119,10 +110,13 @@ public class SignupActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    //Room 기반 회원가입(로컬 DB 저장)
-    private void requestSignup(String name, String id, String pw) {
+    private void hideError() {
+        tvError.setText("");
+        tvError.setVisibility(View.GONE);
+    }
 
-        // 버튼 중복 클릭 방지(선택)
+    // Room 기반 회원가입
+    private void requestSignup(String name, String id, String pw) {
         btnSignup.setEnabled(false);
 
         dbExecutor.execute(() -> {
@@ -144,19 +138,22 @@ public class SignupActivity extends AppCompatActivity {
                 UserEntity user = new UserEntity();
                 user.name = name;
                 user.username = id;
-                user.passwordHash = PasswordUtil.sha256(pw); // 해시 저장
+                user.passwordHash = PasswordUtil.sha256(pw);
                 user.createdAt = System.currentTimeMillis();
 
-                // 3) DB insert
-                userDao.insert(user);
+                // 3) insert
+                // - UserDao.insert가 long 리턴이면 id를 받아올 수 있음
+                // - (ABORT 정책이면 중복/제약 위반 시 예외)
+                long newId = userDao.insert(user);
 
-                // 4) 성공 처리 (UI 스레드)
                 runOnUiThread(() -> {
                     btnSignup.setEnabled(true);
+                    hideError();
                     Toast.makeText(SignupActivity.this, "회원가입 완료!", Toast.LENGTH_SHORT).show();
 
-                    // 로그인 페이지로 이동
+                    // 회원가입 직후 자동 로그인까지는 안 하고, 로그인 화면으로 이동
                     Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                     finish();
                 });
@@ -164,7 +161,7 @@ public class SignupActivity extends AppCompatActivity {
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     btnSignup.setEnabled(true);
-                    showError("회원가입 실패: " + e.getMessage());
+                    showError("회원가입 실패");
                 });
             }
         });
