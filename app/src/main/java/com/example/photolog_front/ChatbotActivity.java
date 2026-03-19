@@ -478,7 +478,7 @@ public class ChatbotActivity extends AppCompatActivity {
 
         DiaryEntity diary = new DiaryEntity();
         diary.userId = currentUserId;
-        diary.title = MockDiaryChatManager.buildTitle(messages);
+        diary.title = "오늘의 하루";
         diary.content = MockDiaryChatManager.buildDiary(messages);
         diary.dateText = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(now));
         diary.photoUri = imageUriString;

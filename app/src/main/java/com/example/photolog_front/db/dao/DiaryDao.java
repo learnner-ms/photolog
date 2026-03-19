@@ -28,9 +28,12 @@ public interface DiaryDao {
     @Query("SELECT * FROM diaries WHERE userId = :userId ORDER BY createdAt DESC")
     List<DiaryEntity> getAllDiaries(long userId);
 
-    @Query("DELETE FROM diaries WHERE userId = :userId")
-    void deleteAllByUser(long userId);
-
     @Query("SELECT COUNT(*) FROM diaries WHERE userId = :userId")
     int countByUserId(long userId);
+
+    @Query("DELETE FROM diaries WHERE id = :id")
+    void deleteById(long id);
+
+    @Query("DELETE FROM diaries WHERE userId = :userId")
+    void deleteAllByUser(long userId);
 }

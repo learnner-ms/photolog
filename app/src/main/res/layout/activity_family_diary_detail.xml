@@ -134,6 +134,21 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_delete_diary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp"
+                android:text="일기 삭제하기"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:fontFamily="@font/paperlogy_7"
+                android:visibility="gone"
+                app:backgroundTint="#C96A6A"
+                app:cornerRadius="12dp"/>
+
             <TextView
                 android:id="@+id/tv_comment_header"
                 android:layout_width="wrap_content"

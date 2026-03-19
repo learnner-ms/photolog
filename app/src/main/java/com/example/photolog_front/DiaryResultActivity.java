@@ -123,8 +123,13 @@ public class DiaryResultActivity extends AppCompatActivity {
 
                     currentDiaryEntity = diary;
 
-                    tvTitle.setText(diary.title != null ? diary.title : "오늘의 일기");
+                    tvTitle.setText(
+                            (diary.title != null && !diary.title.trim().isEmpty()) ? diary.title : "오늘의 하루"
+                    );
                     etContent.setText(diary.content != null ? diary.content : "");
+
+                    if (diary.title != null) tvTitle.setText(diary.title);
+                    else tvTitle.setText("오늘의 하루");
 
                     if (diary.dateText != null && !diary.dateText.trim().isEmpty()) {
                         tvDate.setText(diary.dateText);
