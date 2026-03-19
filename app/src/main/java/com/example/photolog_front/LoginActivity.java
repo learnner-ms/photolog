@@ -11,8 +11,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.photolog_front.db.AppDatabase;
-import com.example.photolog_front.db.UserDao;
-import com.example.photolog_front.db.UserEntity;
+import com.example.photolog_front.db.dao.UserDao;
+import com.example.photolog_front.db.entity.UserEntity;
 import com.example.photolog_front.util.PasswordUtil;
 import com.example.photolog_front.util.PrefsKeys;
 

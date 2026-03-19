@@ -3,11 +3,11 @@ package com.example.photolog_front;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -23,19 +23,23 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.photolog_front.model.ChatMessageRequest;
-import com.example.photolog_front.model.ChatMessageResponse;
-import com.example.photolog_front.network.ApiService;
-import com.example.photolog_front.network.RetrofitClient;
+import com.example.photolog_front.db.AppDatabase;
+import com.example.photolog_front.db.entity.ChatMessageEntity;
+import com.example.photolog_front.db.entity.ChatSessionEntity;
+import com.example.photolog_front.db.entity.DiaryEntity;
+import com.example.photolog_front.mock.MockDiaryChatManager;
+import com.example.photolog_front.util.PrefsKeys;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.Locale;
 
 public class ChatbotActivity extends AppCompatActivity {
+
+    private static final String PLACEHOLDER_TEXT = "답변을 입력하려면 여기를 눌러주세요.";
+    private static final int MIN_ANSWERS = 3;
 
     private RecyclerView chatRecyclerView;
     private ChatAdapter chatAdapter;
@@ -44,11 +48,15 @@ public class ChatbotActivity extends AppCompatActivity {
     private ImageButton btnMic;
     private AppCompatButton btnFinishChat;
 
-    private int sessionId;          // Integer 세션 ID
-    private String imageUriString;  // 선택한 사진 원본 URI
+    private long chatSessionId = -1L;
+    private long currentUserId = -1L;
+    private String imageUriString;
+    private String firstQuestionFromIntent;
 
-    private static final int MIN_ANSWERS = 3;
     private int answerCount = 0;
+    private boolean isInitializing = false;
+    private boolean isProcessingAnswer = false;
+    private boolean isNavigatingToResult = false;
 
     private final ActivityResultLauncher<Intent> speechLauncher =
             registerForActivityResult(
@@ -70,62 +78,249 @@ public class ChatbotActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbot);
 
-        // ====== Intent 데이터 받아오기 ======
-        sessionId = getIntent().getIntExtra("session_id", -1);
-        String firstQuestion = getIntent().getStringExtra("question");
-        imageUriString = getIntent().getStringExtra("selected_photo_uri");
+        bindViews();
+        setupRecyclerView();
+        setupClickListeners();
+        readIntentData();
+        resolveCurrentUser();
 
-        // ====== UI 초기화 ======
+        if (!validateRequiredData()) {
+            return;
+        }
+
+        prepareChatSessionAndInit();
+    }
+
+    private void bindViews() {
         chatRecyclerView = findViewById(R.id.chat_recycler_view);
         btnMic = findViewById(R.id.btn_mic);
         btnFinishChat = findViewById(R.id.btn_finish_chat);
 
+        btnFinishChat.setText("일기 생성하기");
         btnFinishChat.setVisibility(View.INVISIBLE);
         btnFinishChat.setEnabled(false);
+    }
 
+    private void setupRecyclerView() {
         chatAdapter = new ChatAdapter(this, messageList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
         chatRecyclerView.setLayoutManager(layoutManager);
         chatRecyclerView.setAdapter(chatAdapter);
+    }
 
-        // ====== 초기 메시지 표시 (사진 + 첫 질문) ======
-        Uri uri = imageUriString != null ? Uri.parse(imageUriString) : null;
+    private void setupClickListeners() {
+        btnMic.setOnClickListener(v -> {
+            if (isInitializing || isProcessingAnswer || isNavigatingToResult) return;
+            if (checkAudioPermission()) startSpeechRecognition();
+        });
 
-        if (uri != null) {
-            messageList.add(new ChatMessage(ChatMessage.VIEW_TYPE_IMAGE, null, uri));
+        btnFinishChat.setOnClickListener(v -> {
+            if (isInitializing || isProcessingAnswer || isNavigatingToResult) return;
+            finishManually();
+        });
+
+        findViewById(R.id.layout_logo).setOnClickListener(v -> showExitConfirmDialog());
+    }
+
+    private void readIntentData() {
+        Intent intent = getIntent();
+        chatSessionId = intent.getLongExtra("chat_session_id", -1L);
+        currentUserId = intent.getLongExtra("current_user_id", -1L);
+        imageUriString = intent.getStringExtra("selected_photo_uri");
+        firstQuestionFromIntent = intent.getStringExtra("question");
+    }
+
+    private void resolveCurrentUser() {
+        if (currentUserId != -1L) return;
+
+        SharedPreferences prefs = getSharedPreferences(PrefsKeys.PREFS_AUTH, MODE_PRIVATE);
+        currentUserId = prefs.getLong(PrefsKeys.KEY_CURRENT_USER_ID, -1L);
+    }
+
+    private boolean validateRequiredData() {
+        if (currentUserId == -1L) {
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            finish();
+            return false;
         }
-        if (firstQuestion != null) {
+
+        if (imageUriString == null || imageUriString.trim().isEmpty()) {
+            Toast.makeText(this, "사진 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            finish();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void prepareChatSessionAndInit() {
+        isInitializing = true;
+        setInputEnabled(false);
+
+        new Thread(() -> {
+            try {
+                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+
+                if (chatSessionId != -1L) {
+                    ChatSessionEntity existingSession = db.chatSessionDao().findById(chatSessionId);
+
+                    if (existingSession == null) {
+                        runOnUiThread(() -> {
+                            isInitializing = false;
+                            Toast.makeText(this, "채팅 세션을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                        return;
+                    }
+
+                    List<ChatMessageEntity> savedMessages = db.chatMessageDao().findBySessionId(chatSessionId);
+
+                    runOnUiThread(() -> {
+                        initChatUiFromSavedSession(savedMessages);
+                        isInitializing = false;
+                        setInputEnabled(true);
+                        updateFinishButtonState();
+                    });
+                    return;
+                }
+
+                long now = System.currentTimeMillis();
+
+                ChatSessionEntity newSession = new ChatSessionEntity();
+                newSession.userId = currentUserId;
+                newSession.photoUri = imageUriString;
+                newSession.stepIndex = 0;
+                newSession.isCompleted = false;
+                newSession.createdAt = now;
+
+                long newSessionId = db.chatSessionDao().insert(newSession);
+
+                final String firstQuestion =
+                        (firstQuestionFromIntent == null || firstQuestionFromIntent.trim().isEmpty())
+                                ? MockDiaryChatManager.getFirstQuestion()
+                                : firstQuestionFromIntent;
+
+                ChatMessageEntity firstBotMessage = new ChatMessageEntity();
+                firstBotMessage.sessionId = newSessionId;
+                firstBotMessage.sender = "BOT";
+                firstBotMessage.message = firstQuestion;
+                firstBotMessage.createdAt = now;
+                db.chatMessageDao().insert(firstBotMessage);
+
+                chatSessionId = newSessionId;
+
+                runOnUiThread(() -> {
+                    initChatUiFresh(firstQuestion);
+                    isInitializing = false;
+                    setInputEnabled(true);
+                    updateFinishButtonState();
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    isInitializing = false;
+                    Toast.makeText(this, "채팅 준비 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                });
+            }
+        }).start();
+    }
+
+    private void initChatUiFresh(String firstQuestion) {
+        messageList.clear();
+
+        Uri uri = Uri.parse(imageUriString);
+        messageList.add(new ChatMessage(ChatMessage.VIEW_TYPE_IMAGE, null, uri));
+
+        if (firstQuestion != null && !firstQuestion.trim().isEmpty()) {
             messageList.add(new ChatMessage(ChatMessage.VIEW_TYPE_AI_QUESTION, firstQuestion, null));
         }
 
         messageList.add(new ChatMessage(
                 ChatMessage.VIEW_TYPE_USER_ANSWER,
-                "답변을 입력하려면 여기를 눌러주세요.",
+                PLACEHOLDER_TEXT,
                 null
         ));
 
+        answerCount = 0;
         chatAdapter.notifyDataSetChanged();
-
-        // 마이크 버튼
-        btnMic.setOnClickListener(v -> {
-            if (checkAudioPermission()) startSpeechRecognition();
-        });
-
-        // 종료 버튼 (수동 종료 → 세션 강제 완료 API 연결 가능)
-        btnFinishChat.setOnClickListener(v -> finishManually());
-
-        findViewById(R.id.layout_logo).setOnClickListener(v -> showExitConfirmDialog());
+        scrollToBottom();
     }
 
+    private void initChatUiFromSavedSession(List<ChatMessageEntity> savedMessages) {
+        messageList.clear();
 
-    // ===== 권한 =====
+        Uri uri = Uri.parse(imageUriString);
+        messageList.add(new ChatMessage(ChatMessage.VIEW_TYPE_IMAGE, null, uri));
+
+        answerCount = 0;
+
+        if (savedMessages != null) {
+            for (ChatMessageEntity entity : savedMessages) {
+                if ("BOT".equals(entity.sender)) {
+                    messageList.add(new ChatMessage(
+                            ChatMessage.VIEW_TYPE_AI_QUESTION,
+                            entity.message,
+                            null
+                    ));
+                } else if ("USER".equals(entity.sender)) {
+                    messageList.add(new ChatMessage(
+                            ChatMessage.VIEW_TYPE_USER_ANSWER,
+                            entity.message,
+                            null
+                    ));
+                    answerCount++;
+                }
+            }
+        }
+
+        if (shouldShowInputPlaceholder(savedMessages)) {
+            messageList.add(new ChatMessage(
+                    ChatMessage.VIEW_TYPE_USER_ANSWER,
+                    PLACEHOLDER_TEXT,
+                    null
+            ));
+        }
+
+        chatAdapter.notifyDataSetChanged();
+        scrollToBottom();
+    }
+
+    private boolean shouldShowInputPlaceholder(List<ChatMessageEntity> savedMessages) {
+        if (savedMessages == null || savedMessages.isEmpty()) {
+            return true;
+        }
+
+        ChatMessageEntity last = savedMessages.get(savedMessages.size() - 1);
+        return "BOT".equals(last.sender);
+    }
+
+    private void setInputEnabled(boolean enabled) {
+        btnMic.setEnabled(enabled);
+        if (answerCount >= MIN_ANSWERS) {
+            btnFinishChat.setEnabled(enabled);
+        } else {
+            btnFinishChat.setEnabled(false);
+        }
+    }
+
+    private void scrollToBottom() {
+        if (!messageList.isEmpty()) {
+            chatRecyclerView.scrollToPosition(messageList.size() - 1);
+        }
+    }
+
     private boolean checkAudioPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO}, 100);
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    100
+            );
             return false;
         }
         return true;
@@ -137,149 +332,264 @@ public class ChatbotActivity extends AppCompatActivity {
         speechLauncher.launch(intent);
     }
 
-
-    // ===== 답변 추가 =====
     public void addUserAnswer(String text, String inputType) {
+        if (isInitializing || isProcessingAnswer || isNavigatingToResult) return;
 
-        int lastIdx = -1;
-        for (int i = messageList.size() - 1; i >= 0; i--) {
-            if (messageList.get(i).getViewType() == ChatMessage.VIEW_TYPE_USER_ANSWER) {
-                lastIdx = i;
-                break;
-            }
+        String trimmed = text == null ? "" : text.trim();
+        if (trimmed.isEmpty()) {
+            Toast.makeText(this, "답변을 입력해주세요.", Toast.LENGTH_SHORT).show();
+            return;
         }
 
+        isProcessingAnswer = true;
+        setInputEnabled(false);
+
+        int lastIdx = findLastPlaceholderIndex();
+
         if (lastIdx != -1) {
-            messageList.set(lastIdx, new ChatMessage(ChatMessage.VIEW_TYPE_USER_ANSWER, text, null));
+            messageList.set(lastIdx, new ChatMessage(ChatMessage.VIEW_TYPE_USER_ANSWER, trimmed, null));
             chatAdapter.notifyItemChanged(lastIdx);
+        } else {
+            messageList.add(new ChatMessage(ChatMessage.VIEW_TYPE_USER_ANSWER, trimmed, null));
+            chatAdapter.notifyItemInserted(messageList.size() - 1);
         }
 
         answerCount++;
         if (answerCount >= MIN_ANSWERS) {
-            btnFinishChat.setVisibility(View.VISIBLE);
-            btnFinishChat.setEnabled(true);
+            if (btnFinishChat.getVisibility() != View.VISIBLE) {
+                btnFinishChat.setVisibility(View.VISIBLE);
+                Toast.makeText(this, "이제 원하면 현재 내용으로 일기를 만들 수 있어요.", Toast.LENGTH_SHORT).show();
+            }
         }
 
-        sendUserMessageToServer(text);
+        scrollToBottom();
+        processUserAnswerLocally(trimmed);
     }
 
+    private int findLastPlaceholderIndex() {
+        for (int i = messageList.size() - 1; i >= 0; i--) {
+            ChatMessage item = messageList.get(i);
+            if (item.getViewType() == ChatMessage.VIEW_TYPE_USER_ANSWER &&
+                    PLACEHOLDER_TEXT.equals(item.getText())) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
-    // ===== 서버 전송 =====
-    private void sendUserMessageToServer(String content) {
+    private void processUserAnswerLocally(String answerText) {
+        if (chatSessionId <= 0) {
+            isProcessingAnswer = false;
+            Toast.makeText(this, "채팅 세션 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        ChatMessageRequest body = new ChatMessageRequest(content);
-        ApiService api = RetrofitClient.getApiService(this);
+        new Thread(() -> {
+            try {
+                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
 
-        api.sendChatAnswer(sessionId, body).enqueue(new Callback<ChatMessageResponse>() {
-            @Override
-            public void onResponse(Call<ChatMessageResponse> call, Response<ChatMessageResponse> response) {
-
-                if (!response.isSuccessful()) {
-                    Log.e("Chatbot", "서버 오류: " + response.code());
+                ChatSessionEntity session = db.chatSessionDao().findById(chatSessionId);
+                if (session == null) {
+                    runOnUiThread(() -> {
+                        isProcessingAnswer = false;
+                        setInputEnabled(true);
+                        updateFinishButtonState();
+                        Toast.makeText(this, "세션을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    });
                     return;
                 }
 
-                ChatMessageResponse res = response.body();
-                if (res == null) return;
+                long now = System.currentTimeMillis();
 
-                if (!res.completed) {
-                    addNextQuestion(res.next_question);
+                ChatMessageEntity userMessage = new ChatMessageEntity();
+                userMessage.sessionId = chatSessionId;
+                userMessage.sender = "USER";
+                userMessage.message = answerText;
+                userMessage.createdAt = now;
+                db.chatMessageDao().insert(userMessage);
+
+                int currentStep = session.stepIndex;
+
+                if (MockDiaryChatManager.hasNextQuestion(currentStep)) {
+                    String nextQuestion = MockDiaryChatManager.getNextQuestion(currentStep);
+
+                    session.stepIndex = currentStep + 1;
+                    db.chatSessionDao().update(session);
+
+                    ChatMessageEntity botMessage = new ChatMessageEntity();
+                    botMessage.sessionId = chatSessionId;
+                    botMessage.sender = "BOT";
+                    botMessage.message = nextQuestion;
+                    botMessage.createdAt = System.currentTimeMillis();
+                    db.chatMessageDao().insert(botMessage);
+
+                    runOnUiThread(() -> {
+                        addNextQuestion(nextQuestion);
+                        isProcessingAnswer = false;
+                        setInputEnabled(true);
+                        updateFinishButtonState();
+                    });
 
                 } else {
-                    goToDiaryResult(res);   // 🔥 자동 완성 시 DiaryResultActivity로 이동
-                }
-            }
+                    session.isCompleted = true;
+                    db.chatSessionDao().update(session);
 
-            @Override
-            public void onFailure(Call<ChatMessageResponse> call, Throwable t) {
-                Toast.makeText(ChatbotActivity.this,
-                        "서버 통신 오류: " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
+                    List<ChatMessageEntity> allMessages = db.chatMessageDao().findBySessionId(chatSessionId);
+                    long diaryId = saveDiaryToRoom(db, allMessages);
+
+                    runOnUiThread(() -> {
+                        isProcessingAnswer = false;
+                        setInputEnabled(true);
+                        updateFinishButtonState();
+                        goToDiaryResult(diaryId);
+                    });
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    isProcessingAnswer = false;
+                    setInputEnabled(true);
+                    updateFinishButtonState();
+                    Toast.makeText(
+                            ChatbotActivity.this,
+                            "답변 처리 중 오류가 발생했습니다.",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                });
             }
-        });
+        }).start();
     }
 
-
-    // ===== 다음 질문 =====
     private void addNextQuestion(String question) {
         messageList.add(new ChatMessage(ChatMessage.VIEW_TYPE_AI_QUESTION, question, null));
-        messageList.add(new ChatMessage(ChatMessage.VIEW_TYPE_USER_ANSWER,
-                "답변을 입력하려면 여기를 눌러주세요.", null));
+        messageList.add(new ChatMessage(
+                ChatMessage.VIEW_TYPE_USER_ANSWER,
+                PLACEHOLDER_TEXT,
+                null
+        ));
 
         chatAdapter.notifyDataSetChanged();
-        chatRecyclerView.scrollToPosition(messageList.size() - 1);
+        scrollToBottom();
     }
 
+    private long saveDiaryToRoom(AppDatabase db, List<ChatMessageEntity> messages) {
+        long now = System.currentTimeMillis();
 
-    // ===== AI가 완성한 일기 결과 화면 이동 =====
-    private void goToDiaryResult(ChatMessageResponse res) {
+        DiaryEntity diary = new DiaryEntity();
+        diary.userId = currentUserId;
+        diary.title = MockDiaryChatManager.buildTitle(messages);
+        diary.content = MockDiaryChatManager.buildDiary(messages);
+        diary.dateText = new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(now));
+        diary.photoUri = imageUriString;
+        diary.createdAt = now;
+
+        return db.diaryDao().insert(diary);
+    }
+
+    private void goToDiaryResult(long diaryId) {
+        if (isNavigatingToResult) return;
+        isNavigatingToResult = true;
+
         Intent intent = new Intent(this, DiaryResultActivity.class);
-        intent.putExtra("diary_title", res.diary.title);
-        intent.putExtra("diary_content", res.diary.content);
-        intent.putExtra("photo_uri", imageUriString); // 🔥 선택한 사진 함께 전달
+        intent.putExtra("diary_id", diaryId);
+        intent.putExtra("photo_uri", imageUriString);
         startActivity(intent);
+        finish();
     }
 
-    // ===== 유저가 수동 종료 (세션 stop 호출) =====
     private void finishManually() {
-        if (sessionId <= 0) {
+        if (chatSessionId <= 0) {
             Toast.makeText(this, "세션 정보가 없습니다.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 버튼 연타 방지 (선택)
-        btnFinishChat.setEnabled(false);
+        isProcessingAnswer = true;
+        setInputEnabled(false);
 
-        ApiService api = RetrofitClient.getApiService(this);
-        api.stopSession(sessionId).enqueue(new Callback<ChatMessageResponse>() {
-            @Override
-            public void onResponse(Call<ChatMessageResponse> call,
-                                   Response<ChatMessageResponse> response) {
+        new Thread(() -> {
+            try {
+                AppDatabase db = AppDatabase.getInstance(getApplicationContext());
 
-                btnFinishChat.setEnabled(true);
-
-                if (!response.isSuccessful() || response.body() == null) {
-                    Toast.makeText(ChatbotActivity.this,
-                            "일기 생성에 실패했습니다. (서버 응답: " + response.code() + ")",
-                            Toast.LENGTH_SHORT).show();
+                ChatSessionEntity session = db.chatSessionDao().findById(chatSessionId);
+                if (session == null) {
+                    runOnUiThread(() -> {
+                        isProcessingAnswer = false;
+                        setInputEnabled(true);
+                        updateFinishButtonState();
+                        Toast.makeText(this, "세션을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    });
                     return;
                 }
 
-                ChatMessageResponse res = response.body();
+                List<ChatMessageEntity> allMessages = db.chatMessageDao().findBySessionId(chatSessionId);
 
-                // completed + diary 가 있어야 일기 화면으로 이동
-                if (!res.completed || res.diary == null) {
-                    Toast.makeText(ChatbotActivity.this,
-                            "아직 일기를 만들 수 있는 정보가 부족해요.",
-                            Toast.LENGTH_SHORT).show();
+                int userAnswerCount = 0;
+                for (ChatMessageEntity message : allMessages) {
+                    if ("USER".equals(message.sender)) {
+                        userAnswerCount++;
+                    }
+                }
+
+                if (userAnswerCount < MIN_ANSWERS) {
+                    runOnUiThread(() -> {
+                        isProcessingAnswer = false;
+                        setInputEnabled(true);
+                        updateFinishButtonState();
+                        Toast.makeText(
+                                this,
+                                "아직 일기를 만들 수 있는 정보가 부족해요.",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    });
                     return;
                 }
 
-                // 자동완성 때 쓰던 로직 재사용
-                goToDiaryResult(res);
-                finish();
-            }
+                session.isCompleted = true;
+                db.chatSessionDao().update(session);
 
-            @Override
-            public void onFailure(Call<ChatMessageResponse> call, Throwable t) {
-                btnFinishChat.setEnabled(true);
-                Toast.makeText(ChatbotActivity.this,
-                        "서버 통신 오류: " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
+                long diaryId = saveDiaryToRoom(db, allMessages);
+
+                runOnUiThread(() -> {
+                    isProcessingAnswer = false;
+                    goToDiaryResult(diaryId);
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    isProcessingAnswer = false;
+                    setInputEnabled(true);
+                    updateFinishButtonState();
+                    Toast.makeText(
+                            ChatbotActivity.this,
+                            "일기 생성 중 오류가 발생했습니다.",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                });
             }
-        });
+        }).start();
     }
 
+    private void updateFinishButtonState() {
+        if (answerCount >= MIN_ANSWERS) {
+            btnFinishChat.setVisibility(View.VISIBLE);
+            btnFinishChat.setEnabled(!isInitializing && !isProcessingAnswer && !isNavigatingToResult);
+        } else {
+            btnFinishChat.setVisibility(View.INVISIBLE);
+            btnFinishChat.setEnabled(false);
+        }
+    }
 
-
-    // ===== 종료 다이얼로그 =====
     private void showExitConfirmDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_exit_chatbot, null);
         builder.setView(dialogView);
 
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         AppCompatButton btnYes = dialogView.findViewById(R.id.btn_yes);
         AppCompatButton btnNo = dialogView.findViewById(R.id.btn_no);
@@ -293,9 +603,8 @@ public class ChatbotActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
-    // ===== 사용자 입력 팝업 =====
     public void showCustomInputDialog(String title, String defaultText, OnSaveListener listener) {
+        if (isInitializing || isProcessingAnswer || isNavigatingToResult) return;
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_custom, null);
         TextView tv = dialogView.findViewById(R.id.tv_dialog_title);
@@ -305,7 +614,7 @@ public class ChatbotActivity extends AppCompatActivity {
 
         tv.setText(title);
 
-        if (defaultText == null || defaultText.equals("답변을 입력하려면 여기를 눌러주세요.")) {
+        if (defaultText == null || PLACEHOLDER_TEXT.equals(defaultText)) {
             et.setHint("답변을 입력하세요");
         } else {
             et.setText(defaultText);
@@ -318,11 +627,17 @@ public class ChatbotActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnSave.setOnClickListener(v -> {
             String text = et.getText().toString().trim();
-            if (!text.isEmpty()) listener.onSave(text);
+            if (!text.isEmpty()) {
+                listener.onSave(text);
+            } else {
+                Toast.makeText(this, "답변을 입력해주세요.", Toast.LENGTH_SHORT).show();
+            }
             dialog.dismiss();
         });
 
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
         dialog.show();
     }
 

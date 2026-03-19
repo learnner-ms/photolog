@@ -17,8 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.photolog_front.db.AppDatabase;
-import com.example.photolog_front.db.DiaryDao;
-import com.example.photolog_front.db.DiaryEntity;
+import com.example.photolog_front.db.dao.DiaryDao;
+import com.example.photolog_front.db.entity.DiaryEntity;
 import com.example.photolog_front.model.FamilyCommentRequest;
 import com.example.photolog_front.model.FamilyCommentResponse;
 import com.example.photolog_front.network.ApiService;

@@ -47,7 +47,7 @@
       android:background="@drawable/button_background"
       android:fontFamily="@font/paperlogy_7"
       android:paddingHorizontal="14dp"
-      android:text="끝내기"
+      android:text="일기 생성하기"
       android:textColor="#6D4C41"
       android:textSize="30sp"
       android:visibility="invisible"

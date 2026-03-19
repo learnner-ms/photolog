@@ -21,9 +21,9 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.bumptech.glide.Glide;
 import com.example.photolog_front.db.AppDatabase;
-import com.example.photolog_front.db.DiaryDao;
-import com.example.photolog_front.db.UserDao;
-import com.example.photolog_front.db.UserEntity;
+import com.example.photolog_front.db.dao.DiaryDao;
+import com.example.photolog_front.db.dao.UserDao;
+import com.example.photolog_front.db.entity.UserEntity;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

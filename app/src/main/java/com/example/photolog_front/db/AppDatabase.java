@@ -6,9 +6,23 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.example.photolog_front.db.dao.ChatMessageDao;
+import com.example.photolog_front.db.dao.ChatSessionDao;
+import com.example.photolog_front.db.dao.DiaryDao;
+import com.example.photolog_front.db.dao.UserDao;
+import com.example.photolog_front.db.entity.ChatMessageEntity;
+import com.example.photolog_front.db.entity.ChatSessionEntity;
+import com.example.photolog_front.db.entity.DiaryEntity;
+import com.example.photolog_front.db.entity.UserEntity;
+
 @Database(
-        entities = {UserEntity.class, DiaryEntity.class},
-        version = 2,
+        entities = {
+                UserEntity.class,
+                DiaryEntity.class,
+                ChatSessionEntity.class,
+                ChatMessageEntity.class
+        },
+        version = 3,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -17,6 +31,8 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UserDao userDao();
     public abstract DiaryDao diaryDao();
+    public abstract ChatSessionDao chatSessionDao();
+    public abstract ChatMessageDao chatMessageDao();
 
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {

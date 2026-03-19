@@ -1,4 +1,4 @@
-package com.example.photolog_front.db;
+package com.example.photolog_front.db.entity;
 
 import androidx.room.Entity;
 import androidx.room.Index;

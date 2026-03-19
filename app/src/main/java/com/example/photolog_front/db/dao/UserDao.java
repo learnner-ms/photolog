@@ -1,9 +1,11 @@
-package com.example.photolog_front.db;
+package com.example.photolog_front.db.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+
+import com.example.photolog_front.db.entity.UserEntity;
 
 @Dao
 public interface UserDao {

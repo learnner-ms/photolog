@@ -19,8 +19,8 @@ import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.bumptech.glide.Glide;
 import com.example.photolog_front.db.AppDatabase;
-import com.example.photolog_front.db.DiaryDao;
-import com.example.photolog_front.db.DiaryEntity;
+import com.example.photolog_front.db.dao.DiaryDao;
+import com.example.photolog_front.db.entity.DiaryEntity;
 import com.example.photolog_front.model.FamilyItem;
 import com.example.photolog_front.model.FamilyPostItem;
 import com.example.photolog_front.network.ApiService;
