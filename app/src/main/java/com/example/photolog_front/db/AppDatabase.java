@@ -10,10 +10,13 @@ import androidx.room.Transaction;
 import com.example.photolog_front.db.dao.ChatMessageDao;
 import com.example.photolog_front.db.dao.ChatSessionDao;
 import com.example.photolog_front.db.dao.DiaryDao;
+import com.example.photolog_front.db.dao.GroupDao;
 import com.example.photolog_front.db.dao.UserDao;
 import com.example.photolog_front.db.entity.ChatMessageEntity;
 import com.example.photolog_front.db.entity.ChatSessionEntity;
 import com.example.photolog_front.db.entity.DiaryEntity;
+import com.example.photolog_front.db.entity.GroupEntity;
+import com.example.photolog_front.db.entity.GroupMemberEntity;
 import com.example.photolog_front.db.entity.UserEntity;
 
 @Database(
@@ -21,9 +24,11 @@ import com.example.photolog_front.db.entity.UserEntity;
                 UserEntity.class,
                 DiaryEntity.class,
                 ChatSessionEntity.class,
-                ChatMessageEntity.class
+                ChatMessageEntity.class,
+                GroupEntity.class,
+                GroupMemberEntity.class
         },
-        version = 3,
+        version = 4,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -34,6 +39,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract DiaryDao diaryDao();
     public abstract ChatSessionDao chatSessionDao();
     public abstract ChatMessageDao chatMessageDao();
+    public abstract GroupDao groupDao();
 
     @Transaction
     public void clearUserPersonalData(long userId) {

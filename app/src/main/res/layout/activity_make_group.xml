@@ -73,7 +73,7 @@
             android:layout_marginTop="15dp"
             android:background="@drawable/edittext_bg"
             android:hint="최대 인원 수"
-            android:inputType="textPassword"
+            android:inputType="number"
             android:paddingLeft="20dp"
 
             android:textSize="17dp" />

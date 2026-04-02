@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/box_bg"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="14dp">
+
+    <ImageView
+        android:id="@+id/imgMemberProfile"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:src="@drawable/profile" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="14dp">
+
+        <TextView
+            android:id="@+id/tvMemberName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="이름"
+            android:fontFamily="@font/paperlogy_6"
+            android:textSize="20sp"
+            android:textColor="#5D3316" />
+
+        <TextView
+            android:id="@+id/tvMemberDiaryCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작성한 일기 수 : 0"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/paperlogy_5"
+            android:textSize="14sp"
+            android:textColor="#5D3316" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvMemberRole"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MEMBER"
+        android:fontFamily="@font/paperlogy_6"
+        android:textSize="13sp"
+        android:textColor="#A16D49" />
+
+</LinearLayout>

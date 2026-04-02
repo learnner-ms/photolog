@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -22,9 +23,14 @@ import androidx.appcompat.widget.AppCompatButton;
 import com.bumptech.glide.Glide;
 import com.example.photolog_front.db.AppDatabase;
 import com.example.photolog_front.db.dao.DiaryDao;
+import com.example.photolog_front.db.dao.GroupDao;
 import com.example.photolog_front.db.dao.UserDao;
+import com.example.photolog_front.db.entity.GroupEntity;
+import com.example.photolog_front.db.entity.GroupMemberEntity;
 import com.example.photolog_front.db.entity.UserEntity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,14 +52,25 @@ public class MyPageActivity extends AppCompatActivity {
 
     private ImageView imgProfile;
 
+    private LinearLayout groupMemberContainer;
+    private TextView tvGroupEmptyMessage;
+
     private ActivityResultLauncher<String> pickImageLauncher;
 
     private AppDatabase db;
     private UserDao userDao;
     private DiaryDao diaryDao;
+    private GroupDao groupDao;
+
     private final ExecutorService io = Executors.newSingleThreadExecutor();
 
     private enum GroupState { NONE, OWNER, MEMBER }
+
+    private static class MemberUiModel {
+        String name;
+        int diaryCount;
+        String role;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,15 +80,19 @@ public class MyPageActivity extends AppCompatActivity {
         db = AppDatabase.getInstance(getApplicationContext());
         userDao = db.userDao();
         diaryDao = db.diaryDao();
+        groupDao = db.groupDao();
 
         initViews();
         setupProfilePicker();
         setListeners();
 
         loadUserDataFromRoom();
+    }
 
-        // 그룹 기능 연동 전 임시 상태
-        bindGroupUi(GroupState.NONE);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUserDataFromRoom();
     }
 
     @Override
@@ -99,6 +120,9 @@ public class MyPageActivity extends AppCompatActivity {
         btnWithdraw = findViewById(R.id.btn_withdraw);
 
         imgProfile = findViewById(R.id.profile);
+
+        groupMemberContainer = findViewById(R.id.group_member_container);
+        tvGroupEmptyMessage = findViewById(R.id.tvGroupEmptyMessage);
     }
 
     private void setupProfilePicker() {
@@ -202,26 +226,78 @@ public class MyPageActivity extends AppCompatActivity {
         }
 
         io.execute(() -> {
-            UserEntity user = userDao.findById(userId);
-            int diaryCount = diaryDao.countByUserId(userId);
+            try {
+                UserEntity user = userDao.findById(userId);
+                int myDiaryCount = diaryDao.countByUserId(userId);
 
-            runOnUiThread(() -> {
-                if (user == null) {
-                    Toast.makeText(this, "사용자 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
-                    return;
+                GroupMemberEntity membership = groupDao.findMembershipByUserId(userId);
+                GroupEntity myGroup = groupDao.findGroupByUserId(userId);
+
+                int familyCount = 0;
+                GroupState groupState = GroupState.NONE;
+                List<MemberUiModel> memberItems = new ArrayList<>();
+
+                if (membership != null && myGroup != null) {
+                    if ("OWNER".equals(membership.role)) {
+                        groupState = GroupState.OWNER;
+                    } else {
+                        groupState = GroupState.MEMBER;
+                    }
+
+                    List<Long> memberUserIds = groupDao.getMemberUserIds(myGroup.id);
+
+                    for (Long memberUserId : memberUserIds) {
+                        if (memberUserId == null) continue;
+                        if (memberUserId == userId) continue;
+
+                        UserEntity memberUser = userDao.findById(memberUserId);
+                        if (memberUser == null) continue;
+
+                        MemberUiModel item = new MemberUiModel();
+                        item.name = (memberUser.name != null && !memberUser.name.trim().isEmpty())
+                                ? memberUser.name
+                                : memberUser.username;
+                        item.diaryCount = diaryDao.countByUserId(memberUserId);
+
+                        GroupMemberEntity memberRole = groupDao.findMembershipByUserId(memberUserId);
+                        item.role = (memberRole != null) ? memberRole.role : "MEMBER";
+
+                        memberItems.add(item);
+                    }
+
+                    familyCount = memberItems.size();
                 }
 
-                tvNickname.setText(
-                        user.name != null && !user.name.trim().isEmpty()
-                                ? user.name
-                                : "닉네임"
+                final UserEntity finalUser = user;
+                final int finalMyDiaryCount = myDiaryCount;
+                final int finalFamilyCount = familyCount;
+                final GroupState finalGroupState = groupState;
+                final List<MemberUiModel> finalMemberItems = memberItems;
+
+                runOnUiThread(() -> {
+                    if (finalUser == null) {
+                        Toast.makeText(this, "사용자 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    tvNickname.setText(
+                            finalUser.name != null && !finalUser.name.trim().isEmpty()
+                                    ? finalUser.name
+                                    : "닉네임"
+                    );
+
+                    tvDiaryCount.setText("작성한 일기 수 : " + finalMyDiaryCount);
+                    tvFamilyCount.setText("추가한 가족 수 : " + finalFamilyCount);
+
+                    bindGroupUi(finalGroupState);
+                    renderGroupMembers(finalMemberItems);
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Toast.makeText(this, "마이페이지 정보를 불러오는 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
                 );
-
-                tvDiaryCount.setText("작성한 일기 수 : " + diaryCount);
-
-                // 아직 가족 그룹 DB 연동 전
-                tvFamilyCount.setText("추가한 가족 수 : 0");
-            });
+            }
         });
     }
 
@@ -245,9 +321,40 @@ public class MyPageActivity extends AppCompatActivity {
         }
     }
 
-    // =========================================================
-    // 커스텀 공지 다이얼로그
-    // =========================================================
+    private void renderGroupMembers(List<MemberUiModel> members) {
+        if (groupMemberContainer == null || tvGroupEmptyMessage == null) return;
+
+        groupMemberContainer.removeAllViews();
+
+        if (members == null || members.isEmpty()) {
+            tvGroupEmptyMessage.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        tvGroupEmptyMessage.setVisibility(View.GONE);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        for (MemberUiModel member : members) {
+            View itemView = inflater.inflate(R.layout.item_group_member, groupMemberContainer, false);
+
+            ImageView imgMemberProfile = itemView.findViewById(R.id.imgMemberProfile);
+            TextView tvMemberName = itemView.findViewById(R.id.tvMemberName);
+            TextView tvMemberDiaryCount = itemView.findViewById(R.id.tvMemberDiaryCount);
+            TextView tvMemberRole = itemView.findViewById(R.id.tvMemberRole);
+
+            Glide.with(this)
+                    .load(R.drawable.profile)
+                    .circleCrop()
+                    .into(imgMemberProfile);
+
+            tvMemberName.setText(member.name);
+            tvMemberDiaryCount.setText("작성한 일기 수 : " + member.diaryCount);
+            tvMemberRole.setText(member.role);
+
+            groupMemberContainer.addView(itemView);
+        }
+    }
 
     private void showDeleteAllDiaryDialogCustom() {
         String title = "AI 및 개인정보 전체 삭제";
@@ -347,9 +454,6 @@ public class MyPageActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // ------------------------
-    // AI 및 개인정보 전체 삭제
-    // ------------------------
     private void deleteAllMyPersonalData() {
         final long userId = getCurrentUserId();
 
@@ -385,9 +489,6 @@ public class MyPageActivity extends AppCompatActivity {
         });
     }
 
-    // ------------------------
-    // 회원 탈퇴
-    // ------------------------
     private void withdrawAccount() {
         final long userId = getCurrentUserId();
 
