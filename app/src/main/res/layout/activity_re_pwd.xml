@@ -16,6 +16,9 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">

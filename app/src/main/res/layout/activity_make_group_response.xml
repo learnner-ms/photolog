@@ -45,12 +45,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="그룹 생성"
+            android:text="그룹 참여"
             android:fontFamily="@font/paperlogy_7"
             android:textColor="#5C3A22"
             android:textSize="35sp"
             android:textStyle="bold"
-
             />
 
         <!-- 초대코드 입력 -->

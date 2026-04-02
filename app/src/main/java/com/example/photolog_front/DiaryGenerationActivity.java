@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -46,8 +47,11 @@ public class DiaryGenerationActivity extends AppCompatActivity {
     private static final String KEY_AGREED_PHOTO_NOTICE = "agreed_photo_notice";
     private static final String KEY_AGREED_AI_NOTICE = "agreed_ai_notice";
 
-    private final ActivityResultLauncher<String> galleryLauncher =
-            registerForActivityResult(new ActivityResultContracts.GetContent(), this::onImageSelected);
+    private final ActivityResultLauncher<String[]> galleryLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.OpenDocument(),
+                    this::onImageSelected
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,15 +102,30 @@ public class DiaryGenerationActivity extends AppCompatActivity {
     }
 
     private void onImageSelected(Uri uri) {
-        if (uri != null) {
-            isPhotoSelected = true;
-            selectedImageUri = uri;
-
-            imageView.setImageURI(uri);
-            guideTextView.setText("사진 업로드 준비 완료!\n일기 생성을 시작하세요.");
-            guideTextView.setGravity(Gravity.CENTER);
-            selectPhotoButton.setText("일기 생성 시작");
+        if (uri == null) {
+            Toast.makeText(this, "사진을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        try {
+            getContentResolver().takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+            );
+        } catch (SecurityException e) {
+            e.printStackTrace();
+            // 일부 기기/문서 제공자에서는 예외가 날 수 있으니 앱이 죽지 않게만 처리
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        isPhotoSelected = true;
+        selectedImageUri = uri;
+
+        imageView.setImageURI(uri);
+        guideTextView.setText("사진 업로드 준비 완료!\n일기 생성을 시작하세요.");
+        guideTextView.setGravity(Gravity.CENTER);
+        selectPhotoButton.setText("일기 생성 시작");
     }
 
     private boolean checkMediaPermission() {
@@ -125,7 +144,7 @@ public class DiaryGenerationActivity extends AppCompatActivity {
 
     private void openGalleryWithPermission() {
         if (checkMediaPermission()) {
-            galleryLauncher.launch("image/*");
+            galleryLauncher.launch(new String[]{"image/*"});
         } else {
             requestMediaPermission();
         }

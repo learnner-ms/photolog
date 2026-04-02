@@ -15,6 +15,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
@@ -48,6 +51,7 @@
         android:textStyle="bold" />
 
     <EditText
+        android:id="@+id/etEmail"
         android:layout_gravity="center_horizontal"
         android:layout_width="280dp"
         android:layout_height="45dp"
@@ -64,6 +68,7 @@
         android:orientation="horizontal">
 
         <EditText
+            android:id="@+id/etUserId"
             android:layout_width="160dp"
             android:layout_height="45dp"
             android:layout_gravity="center"
@@ -73,6 +78,7 @@
             android:padding="10dp" />
 
         <android.widget.Button
+            android:id="@+id/btnSendCode"
             android:layout_width="110dp"
             android:layout_height="45dp"
             android:layout_gravity="center"
@@ -84,6 +90,7 @@
             android:padding="10dp" />
     </LinearLayout>
     <EditText
+        android:id="@+id/etCode"
         android:layout_gravity="center_horizontal"
         android:layout_width="280dp"
         android:layout_height="45dp"
@@ -93,9 +100,18 @@
         android:background="@drawable/edittext_bg"
         android:padding="10dp"/>
 
+    <TextView
+        android:id="@+id/tvPwdError"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="6dp"
+        android:textColor="#8B4513"
+        android:textSize="12sp"
+        android:visibility="gone"
+        android:text="모든 칸을 채워주세요." />
 
 
-    <!-- 회원가입 버튼 -->
     <android.widget.Button
         android:id="@+id/goFindPwd"
         android:layout_gravity="center_horizontal"
@@ -122,14 +138,14 @@
             android:layout_height="wrap_content"
             android:text="로그인"
             android:textSize="20sp"
-            android:textColor="#000000"/>
+            android:textColor="#5C3A22"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="  |  "
             android:textSize="20sp"
-            android:textColor="#000000"/>
+            android:textColor="#5C3A22"/>
 
         <TextView
             android:id="@+id/tvFindId"
@@ -137,6 +153,6 @@
             android:layout_height="wrap_content"
             android:text="아이디 찾기"
             android:textSize="20sp"
-            android:textColor="#000000"/>
+            android:textColor="#5C3A22"/>
     </LinearLayout>
 </LinearLayout>

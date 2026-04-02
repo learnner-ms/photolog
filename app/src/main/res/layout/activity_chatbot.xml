@@ -16,6 +16,9 @@
       android:gravity="center_vertical"
       android:layout_margin="16dp"
       android:orientation="horizontal"
+      android:clickable="true"
+      android:focusable="true"
+      android:foreground="?attr/selectableItemBackground"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent">
     <TextView

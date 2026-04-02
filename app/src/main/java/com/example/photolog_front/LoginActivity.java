@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.photolog_front.db.AppDatabase;
@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etId, etPw;
-    private TextView tvError, tvJoin;
+    private TextView tvError, tvJoin, tvFindId, tvFindPassword;
     private Button btnLogin;
 
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
@@ -37,9 +37,21 @@ public class LoginActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tvError);
         btnLogin = findViewById(R.id.btnLogin);
         tvJoin = findViewById(R.id.tvJoin);
+        tvFindId = findViewById(R.id.tvFindId);
+        tvFindPassword = findViewById(R.id.tvFindPassword);
 
         tvJoin.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+            startActivity(intent);
+        });
+
+        tvFindId.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, FindIdActivity.class);
+            startActivity(intent);
+        });
+
+        tvFindPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, FindPwdActivity.class);
             startActivity(intent);
         });
 

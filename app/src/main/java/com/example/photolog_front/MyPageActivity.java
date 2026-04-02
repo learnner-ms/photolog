@@ -44,10 +44,8 @@ public class MyPageActivity extends AppCompatActivity {
     private View btnDeleteAiData;
     private View btnWithdraw;
 
-    // 프로필 이미지
     private ImageView imgProfile;
 
-    // 프로필 사진 선택 런처
     private ActivityResultLauncher<String> pickImageLauncher;
 
     private AppDatabase db;
@@ -72,7 +70,7 @@ public class MyPageActivity extends AppCompatActivity {
 
         loadUserDataFromRoom();
 
-        // ✅ 그룹 연동 전 임시
+        // 그룹 기능 연동 전 임시 상태
         bindGroupUi(GroupState.NONE);
     }
 
@@ -103,13 +101,7 @@ public class MyPageActivity extends AppCompatActivity {
         imgProfile = findViewById(R.id.profile);
     }
 
-    /**
-     * 프로필 사진 선택 기능
-     * - 저장된 profileUri가 있으면 로드
-     * - 클릭하면 갤러리 열고 선택한 이미지 circleCrop 적용 후 저장
-     */
     private void setupProfilePicker() {
-        // 1) 저장된 프로필 URI 로드
         SharedPreferences prefs = getSharedPreferences(PrefsKeys.PREFS_AUTH, MODE_PRIVATE);
         String saved = prefs.getString(PrefsKeys.KEY_PROFILE_URI, null);
 
@@ -123,13 +115,18 @@ public class MyPageActivity extends AppCompatActivity {
                         .error(R.drawable.profile)
                         .into(imgProfile);
             } catch (Exception e) {
-                Glide.with(this).load(R.drawable.profile).circleCrop().into(imgProfile);
+                Glide.with(this)
+                        .load(R.drawable.profile)
+                        .circleCrop()
+                        .into(imgProfile);
             }
         } else {
-            Glide.with(this).load(R.drawable.profile).circleCrop().into(imgProfile);
+            Glide.with(this)
+                    .load(R.drawable.profile)
+                    .circleCrop()
+                    .into(imgProfile);
         }
 
-        // 2) 런처 등록
         pickImageLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -142,7 +139,6 @@ public class MyPageActivity extends AppCompatActivity {
                             .error(R.drawable.profile)
                             .into(imgProfile);
 
-                    // 저장 (PrefsKeys로 통일)
                     getSharedPreferences(PrefsKeys.PREFS_AUTH, MODE_PRIVATE)
                             .edit()
                             .putString(PrefsKeys.KEY_PROFILE_URI, uri.toString())
@@ -160,21 +156,19 @@ public class MyPageActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // 그룹 참여하기
         btnJoinGroup.setOnClickListener(v -> {
             Intent intent = new Intent(MyPageActivity.this, MakeGroupResponse.class);
             startActivity(intent);
         });
 
-        // 그룹 생성하기
         btnCreateGroup.setOnClickListener(v -> {
             Intent intent = new Intent(MyPageActivity.this, MakeGroupActivity.class);
             startActivity(intent);
         });
 
-        // 우상단 액션 버튼(OWNER/MEMBER에서만 보임)
         btnTopAction.setOnClickListener(v -> {
             CharSequence label = btnTopAction.getText();
+
             if ("요청 관리".contentEquals(label)) {
                 Toast.makeText(this, "요청 관리 기능은 추후 연동 예정입니다.", Toast.LENGTH_SHORT).show();
             } else if ("그룹 탈퇴".contentEquals(label)) {
@@ -182,13 +176,13 @@ public class MyPageActivity extends AppCompatActivity {
             }
         });
 
-        // 개인정보 보호
         btnDeleteAiData.setOnClickListener(v -> showDeleteAllDiaryDialogCustom());
         btnWithdraw.setOnClickListener(v -> showWithdrawDialogCustom());
 
-        // 프로필 클릭 → 갤러리 열기
         imgProfile.setOnClickListener(v -> {
-            if (pickImageLauncher != null) pickImageLauncher.launch("image/*");
+            if (pickImageLauncher != null) {
+                pickImageLauncher.launch("image/*");
+            }
         });
     }
 
@@ -218,11 +212,14 @@ public class MyPageActivity extends AppCompatActivity {
                 }
 
                 tvNickname.setText(
-                        user.name != null && !user.name.trim().isEmpty() ? user.name : "닉네임"
+                        user.name != null && !user.name.trim().isEmpty()
+                                ? user.name
+                                : "닉네임"
                 );
+
                 tvDiaryCount.setText("작성한 일기 수 : " + diaryCount);
 
-                // ✅ 그룹 연동 전 임시
+                // 아직 가족 그룹 DB 연동 전
                 tvFamilyCount.setText("추가한 가족 수 : 0");
             });
         });
@@ -240,7 +237,7 @@ public class MyPageActivity extends AppCompatActivity {
             btnTopAction.setVisibility(View.VISIBLE);
             btnTopAction.setText("요청 관리");
 
-        } else { // MEMBER
+        } else {
             sectionNoGroup.setVisibility(View.GONE);
             sectionMyGroup.setVisibility(View.VISIBLE);
             btnTopAction.setVisibility(View.VISIBLE);
@@ -249,14 +246,15 @@ public class MyPageActivity extends AppCompatActivity {
     }
 
     // =========================================================
-    // ✅ 커스텀 공지 다이얼로그 (dialog_notice_common 사용)
+    // 커스텀 공지 다이얼로그
     // =========================================================
 
     private void showDeleteAllDiaryDialogCustom() {
         String title = "AI 및 개인정보 전체 삭제";
         String body =
                 "📓 저장된 AI 일기 데이터가 모두 삭제됩니다.\n\n" +
-                        "💬 사진 분석 및 대화 기록이 함께 제거됩니다.\n\n" +
+                        "💬 AI 대화 기록과 세션 정보가 함께 삭제됩니다.\n\n" +
+                        "🧹 계정은 유지되지만, 서비스 이용 데이터는 초기화됩니다.\n\n" +
                         "⚠️ 삭제된 데이터는 복구할 수 없습니다.";
         String agreeText = "위 내용을 확인했으며 삭제에 동의합니다.";
 
@@ -266,7 +264,7 @@ public class MyPageActivity extends AppCompatActivity {
                 agreeText,
                 "삭제하기",
                 "취소",
-                this::deleteAllMyDiaries
+                this::deleteAllMyPersonalData
         );
     }
 
@@ -274,8 +272,9 @@ public class MyPageActivity extends AppCompatActivity {
         String title = "회원 탈퇴";
         String body =
                 "👤 계정 정보가 모두 삭제됩니다.\n\n" +
-                        "📓 작성한 AI 일기 데이터도 함께 삭제됩니다.\n\n" +
-                        "⚠️ 탈퇴 후에는 복구할 수 없습니다.";
+                        "📓 작성한 AI 일기 데이터와 대화 기록도 함께 삭제됩니다.\n\n" +
+                        "🚪 탈퇴 후에는 로그인할 수 없으며 복구할 수 없습니다.\n\n" +
+                        "⚠️ 삭제된 데이터는 복구할 수 없습니다.";
         String agreeText = "위 내용을 확인했으며 탈퇴에 동의합니다.";
 
         showCommonNoticeDialog(
@@ -314,7 +313,6 @@ public class MyPageActivity extends AppCompatActivity {
         btnPrimary.setText(primaryLabel);
         btnSecondary.setText(secondaryLabel);
 
-        // 체크 전에는 비활성화
         btnPrimary.setEnabled(false);
         btnPrimary.setAlpha(0.45f);
 
@@ -338,53 +336,87 @@ public class MyPageActivity extends AppCompatActivity {
                 Toast.makeText(this, "동의 체크가 필요합니다.", Toast.LENGTH_SHORT).show();
                 return;
             }
+
             dialog.dismiss();
-            if (onConfirmed != null) onConfirmed.run();
+
+            if (onConfirmed != null) {
+                onConfirmed.run();
+            }
         });
 
         dialog.show();
     }
 
     // ------------------------
-    // 개인정보 보호: 전체 삭제 로직
+    // AI 및 개인정보 전체 삭제
     // ------------------------
-    private void deleteAllMyDiaries() {
+    private void deleteAllMyPersonalData() {
         final long userId = getCurrentUserId();
-        if (userId <= 0) return;
+
+        if (userId <= 0) {
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         io.execute(() -> {
-            diaryDao.deleteAllByUser(userId);
+            try {
+                db.clearUserPersonalData(userId);
 
-            runOnUiThread(() -> {
-                Toast.makeText(this, "내 일기 데이터가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-                loadUserDataFromRoom();
-            });
+                runOnUiThread(() -> {
+                    getSharedPreferences(PrefsKeys.PREFS_AUTH, MODE_PRIVATE)
+                            .edit()
+                            .remove(PrefsKeys.KEY_PROFILE_URI)
+                            .apply();
+
+                    Glide.with(this)
+                            .load(R.drawable.profile)
+                            .circleCrop()
+                            .into(imgProfile);
+
+                    Toast.makeText(this, "AI 및 개인정보 데이터가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    loadUserDataFromRoom();
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Toast.makeText(this, "데이터 삭제 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                );
+            }
         });
     }
 
     // ------------------------
-    // 개인정보 보호: 회원 탈퇴 로직
+    // 회원 탈퇴
     // ------------------------
     private void withdrawAccount() {
         final long userId = getCurrentUserId();
-        if (userId <= 0) return;
+
+        if (userId <= 0) {
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         io.execute(() -> {
-            diaryDao.deleteAllByUser(userId);
-            userDao.deleteById(userId);
+            try {
+                db.deleteUserAccountCompletely(userId);
 
-            runOnUiThread(() -> {
-                // SharedPreferences 초기화 (PrefsKeys로 통일)
-                SharedPreferences prefs = getSharedPreferences(PrefsKeys.PREFS_AUTH, MODE_PRIVATE);
-                prefs.edit().clear().apply();
+                runOnUiThread(() -> {
+                    SharedPreferences prefs = getSharedPreferences(PrefsKeys.PREFS_AUTH, MODE_PRIVATE);
+                    prefs.edit().clear().apply();
 
-                Toast.makeText(this, "탈퇴가 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "탈퇴가 완료되었습니다.", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-            });
+                    Intent intent = new Intent(MyPageActivity.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Toast.makeText(this, "회원 탈퇴 처리 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                );
+            }
         });
     }
 }

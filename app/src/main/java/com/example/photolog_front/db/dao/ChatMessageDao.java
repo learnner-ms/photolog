@@ -16,4 +16,10 @@ public interface ChatMessageDao {
 
     @Query("SELECT * FROM chat_messages WHERE sessionId = :sessionId ORDER BY id ASC")
     List<ChatMessageEntity> findBySessionId(long sessionId);
+
+    @Query("DELETE FROM chat_messages WHERE sessionId = :sessionId")
+    void deleteBySessionId(long sessionId);
+
+    @Query("DELETE FROM chat_messages WHERE sessionId IN (SELECT id FROM chat_sessions WHERE userId = :userId)")
+    void deleteAllByUserId(long userId);
 }
