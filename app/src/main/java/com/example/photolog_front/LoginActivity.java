@@ -21,8 +21,12 @@ import java.util.concurrent.Executors;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etId, etPw;
-    private TextView tvError, tvJoin, tvFindId, tvFindPassword;
+    private EditText etId;
+    private EditText etPw;
+    private TextView tvError;
+    private TextView tvJoin;
+    private TextView tvFindId;
+    private TextView tvFindPassword;
     private Button btnLogin;
 
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
@@ -32,6 +36,11 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        initViews();
+        setListeners();
+    }
+
+    private void initViews() {
         etId = findViewById(R.id.etId);
         etPw = findViewById(R.id.etPw);
         tvError = findViewById(R.id.tvError);
@@ -39,7 +48,9 @@ public class LoginActivity extends AppCompatActivity {
         tvJoin = findViewById(R.id.tvJoin);
         tvFindId = findViewById(R.id.tvFindId);
         tvFindPassword = findViewById(R.id.tvFindPassword);
+    }
 
+    private void setListeners() {
         tvJoin.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
             startActivity(intent);
@@ -60,27 +71,17 @@ public class LoginActivity extends AppCompatActivity {
 
     private void attemptLogin() {
         String id = etId.getText().toString().trim();
-        String pw = etPw.getText().toString().trim();
+        String pw = etPw.getText().toString();
 
         if (id.isEmpty() || pw.isEmpty()) {
             showError("아이디와 비밀번호를 입력해주세요.");
             return;
         }
 
+        hideError();
         loginRequest(id, pw);
     }
 
-    private void showError(String msg) {
-        tvError.setText(msg);
-        tvError.setVisibility(TextView.VISIBLE);
-    }
-
-    private void hideError() {
-        tvError.setText("");
-        tvError.setVisibility(TextView.GONE);
-    }
-
-    // Room 기반 로그인
     private void loginRequest(String id, String pw) {
         btnLogin.setEnabled(false);
 
@@ -99,9 +100,9 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                String hashedInput = PasswordUtil.sha256(pw);
+                boolean isPasswordValid = PasswordUtil.verifyPassword(pw, user.passwordHash);
 
-                if (!hashedInput.equals(user.passwordHash)) {
+                if (!isPasswordValid) {
                     runOnUiThread(() -> {
                         btnLogin.setEnabled(true);
                         showError("아이디 또는 비밀번호가 틀렸습니다.");
@@ -109,7 +110,6 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                // 로그인 성공 처리
                 runOnUiThread(() -> {
                     btnLogin.setEnabled(true);
                     hideError();
@@ -134,6 +134,16 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void showError(String msg) {
+        tvError.setText(msg);
+        tvError.setVisibility(TextView.VISIBLE);
+    }
+
+    private void hideError() {
+        tvError.setText("");
+        tvError.setVisibility(TextView.GONE);
     }
 
     @Override

@@ -29,9 +29,20 @@ public class SignupActivity extends AppCompatActivity {
     private CheckBox chkPrivacy;
     private CheckBox chkAd;
 
+    private LinearLayout layoutAllTerms;
+    private LinearLayout layoutUseTerms;
+    private LinearLayout layoutPrivacyTerms;
+    private LinearLayout layoutAdTerms;
+
     private TextView tvTermsUse;
     private TextView tvTermsPrivacy;
     private TextView tvTermsAd;
+
+    // "보기" 텍스트
+    private TextView tvViewUse;
+    private TextView tvViewPrivacy;
+    private TextView tvViewAd;
+
     private TextView tvError;
 
     private EditText signName;
@@ -43,8 +54,10 @@ public class SignupActivity extends AppCompatActivity {
 
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
+    // 전체동의 상태 갱신 중 중복 리스너 방지
     private boolean isUpdatingAllCheckState = false;
 
+    // 상세 약관 화면 결과 받기
     private final ActivityResultLauncher<Intent> termsLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
@@ -82,6 +95,7 @@ public class SignupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         initViews();
+        prepareTermsUiBehavior();
         setListeners();
     }
 
@@ -91,9 +105,18 @@ public class SignupActivity extends AppCompatActivity {
         chkPrivacy = findViewById(R.id.chkPrivacy);
         chkAd = findViewById(R.id.chkAd);
 
+        layoutAllTerms = findViewById(R.id.layoutAllTerms);
+        layoutUseTerms = findViewById(R.id.layoutUseTerms);
+        layoutPrivacyTerms = findViewById(R.id.layoutPrivacyTerms);
+        layoutAdTerms = findViewById(R.id.layoutAdTerms);
+
         tvTermsUse = findViewById(R.id.tvTermsUse);
         tvTermsPrivacy = findViewById(R.id.tvTermsPrivacy);
         tvTermsAd = findViewById(R.id.tvTermsAd);
+
+        tvViewUse = findViewById(R.id.tvViewUse);
+        tvViewPrivacy = findViewById(R.id.tvViewPrivacy);
+        tvViewAd = findViewById(R.id.tvViewAd);
 
         signName = findViewById(R.id.signName);
         signId = findViewById(R.id.signId);
@@ -103,9 +126,65 @@ public class SignupActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tvError);
         btnSignup = findViewById(R.id.btnSignup);
 
+        // 약관 제목 밑줄
         tvTermsUse.setPaintFlags(tvTermsUse.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
         tvTermsPrivacy.setPaintFlags(tvTermsPrivacy.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
         tvTermsAd.setPaintFlags(tvTermsAd.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+
+        // "보기"도 밑줄 주고 싶으면 사용
+        tvViewUse.setPaintFlags(tvViewUse.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        tvViewPrivacy.setPaintFlags(tvViewPrivacy.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        tvViewAd.setPaintFlags(tvViewAd.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+    }
+
+    /**
+     * 원하는 UX:
+     * - 체크박스 클릭: 체크만 됨
+     * - 약관 문장 클릭: 상세 페이지 이동
+     * - "보기" 클릭: 상세 페이지 이동
+     * - 카드 전체는 단순 영역 역할
+     */
+    private void prepareTermsUiBehavior() {
+        // 카드 전체 클릭 비활성화
+        disableLayoutClick(layoutAllTerms);
+        disableLayoutClick(layoutUseTerms);
+        disableLayoutClick(layoutPrivacyTerms);
+        disableLayoutClick(layoutAdTerms);
+
+        // 체크박스는 직접 클릭 가능하게
+        enableCheckboxInteraction(chkAll);
+        enableCheckboxInteraction(chkUse);
+        enableCheckboxInteraction(chkPrivacy);
+        enableCheckboxInteraction(chkAd);
+
+        // 약관 문장 / 보기 텍스트는 클릭 가능하게
+        enableTextInteraction(tvTermsUse);
+        enableTextInteraction(tvTermsPrivacy);
+        enableTextInteraction(tvTermsAd);
+
+        enableTextInteraction(tvViewUse);
+        enableTextInteraction(tvViewPrivacy);
+        enableTextInteraction(tvViewAd);
+    }
+
+    private void disableLayoutClick(LinearLayout layout) {
+        if (layout == null) return;
+        layout.setClickable(false);
+        layout.setFocusable(false);
+    }
+
+    private void enableCheckboxInteraction(CheckBox checkBox) {
+        if (checkBox == null) return;
+        checkBox.setClickable(true);
+        checkBox.setFocusable(true);
+        checkBox.setEnabled(true);
+    }
+
+    private void enableTextInteraction(TextView textView) {
+        if (textView == null) return;
+        textView.setClickable(true);
+        textView.setFocusable(true);
+        textView.setEnabled(true);
     }
 
     private void setListeners() {
@@ -117,20 +196,25 @@ public class SignupActivity extends AppCompatActivity {
             finish();
         });
 
+        // 전체동의 체크박스: 하위 3개 전체 체크/해제
         chkAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isUpdatingAllCheckState) {
                 return;
             }
 
+            isUpdatingAllCheckState = true;
             chkUse.setChecked(isChecked);
             chkPrivacy.setChecked(isChecked);
             chkAd.setChecked(isChecked);
+            isUpdatingAllCheckState = false;
         });
 
+        // 개별 체크박스가 바뀌면 전체동의 갱신
         chkUse.setOnCheckedChangeListener((buttonView, isChecked) -> updateAllChecked());
         chkPrivacy.setOnCheckedChangeListener((buttonView, isChecked) -> updateAllChecked());
         chkAd.setOnCheckedChangeListener((buttonView, isChecked) -> updateAllChecked());
 
+        // 약관 제목 클릭 시 상세 보기
         tvTermsUse.setOnClickListener(v ->
                 openTermsDetail(
                         "이용 약관",
@@ -155,10 +239,39 @@ public class SignupActivity extends AppCompatActivity {
                 )
         );
 
+        // "보기" 클릭 시 상세 보기
+        tvViewUse.setOnClickListener(v ->
+                openTermsDetail(
+                        "이용 약관",
+                        getUseTermsContent(),
+                        "use"
+                )
+        );
+
+        tvViewPrivacy.setOnClickListener(v ->
+                openTermsDetail(
+                        "개인정보 처리방침",
+                        getPrivacyTermsContent(),
+                        "privacy"
+                )
+        );
+
+        tvViewAd.setOnClickListener(v ->
+                openTermsDetail(
+                        "맞춤형 광고 수신 동의",
+                        getAdTermsContent(),
+                        "ad"
+                )
+        );
+
         btnSignup.setOnClickListener(v -> checkSignup());
     }
 
     private void updateAllChecked() {
+        if (isUpdatingAllCheckState) {
+            return;
+        }
+
         boolean allChecked = chkUse.isChecked() && chkPrivacy.isChecked() && chkAd.isChecked();
 
         isUpdatingAllCheckState = true;
@@ -185,6 +298,12 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
+        String passwordError = validatePassword(pw);
+        if (passwordError != null) {
+            showError(passwordError);
+            return;
+        }
+
         if (!pw.equals(pwCheck)) {
             showError("비밀번호가 일치하지 않습니다.");
             return;
@@ -197,6 +316,30 @@ public class SignupActivity extends AppCompatActivity {
 
         hideError();
         requestSignup(name, id, pw);
+    }
+
+    private String validatePassword(String password) {
+        if (password.length() < 8 || password.length() > 20) {
+            return "비밀번호는 8자 이상 20자 이하로 입력해주세요.";
+        }
+
+        if (password.contains(" ")) {
+            return "비밀번호에는 공백을 사용할 수 없습니다.";
+        }
+
+        if (!password.matches(".*[A-Za-z].*")) {
+            return "비밀번호에는 영문이 포함되어야 합니다.";
+        }
+
+        if (!password.matches(".*\\d.*")) {
+            return "비밀번호에는 숫자가 포함되어야 합니다.";
+        }
+
+        if (!password.matches(".*[!@#$%^&*()_+\\-={}\\[\\]:;\"'<>,.?/\\\\|`~].*")) {
+            return "비밀번호에는 특수문자가 포함되어야 합니다.";
+        }
+
+        return null;
     }
 
     private void requestSignup(String name, String id, String pw) {
@@ -219,7 +362,7 @@ public class SignupActivity extends AppCompatActivity {
                 UserEntity user = new UserEntity();
                 user.name = name;
                 user.username = id;
-                user.passwordHash = PasswordUtil.sha256(pw);
+                user.passwordHash = PasswordUtil.hashPassword(pw);
                 user.createdAt = System.currentTimeMillis();
 
                 userDao.insert(user);
