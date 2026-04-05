@@ -1,51 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFEEE0"
-    android:orientation="vertical"
-    android:paddingHorizontal="30dp"
-    android:layout_gravity="center_horizontal"
-    android:paddingTop="50dp">
+    android:orientation="vertical">
 
-    <!-- 로고 클릭 영역 (왼쪽 정렬) -->
+    <!-- ✅ 상단 바 -->
     <LinearLayout
-        android:id="@+id/layout_logo"
-        android:layout_width="wrap_content"
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
+        android:paddingTop="40dp"
+        android:paddingBottom="10dp"
+        android:paddingHorizontal="24dp"
         android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:gravity="center_vertical">
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/layout_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/paperlogy_7"
-            android:text="@string/app_name"
-            android:textColor="#5D3316"
-            android:textSize="32sp" />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <ImageView
-            android:layout_width="52sp"
-            android:layout_height="52sp"
-            android:src="@drawable/photolog_logo"
-            android:layout_margin="2dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="#5D3316"
+                android:textSize="32sp"
+                android:fontFamily="@font/paperlogy_7" />
 
+            <ImageView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="2dp"
+                android:src="@drawable/photolog_logo" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
 
+    <!-- ✅ 본문 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center"
+        android:gravity="center_horizontal"
+        android:paddingHorizontal="30dp"
+        android:paddingTop="80dp">
 
-        >
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,12 +64,8 @@
             android:fontFamily="@font/paperlogy_7"
             android:textColor="#5C3A22"
             android:textSize="35sp"
-            android:textStyle="bold"
+            android:textStyle="bold" />
 
-            />
-
-
-        <!-- 아이디 입력 -->
         <EditText
             android:id="@+id/find_name"
             android:layout_width="280dp"
@@ -66,10 +73,14 @@
             android:layout_marginTop="20dp"
             android:background="@drawable/edittext_bg"
             android:hint="이름"
+            android:inputType="textPersonName"
             android:paddingLeft="20dp"
-            android:textSize="17dp" />
+            android:textSize="17sp"
+            android:textColor="#5D3316"
+            android:textColorHint="#B7A79A"
+            android:fontFamily="@font/paperlogy_6"
+            android:textCursorDrawable="@null" />
 
-        <!-- 비밀번호 입력 -->
         <EditText
             android:id="@+id/find_email"
             android:layout_width="280dp"
@@ -77,25 +88,25 @@
             android:layout_marginTop="15dp"
             android:background="@drawable/edittext_bg"
             android:hint="이메일 주소"
-            android:inputType="textPassword"
+            android:inputType="textEmailAddress"
             android:paddingLeft="20dp"
+            android:textSize="17sp"
+            android:textColor="#5D3316"
+            android:textColorHint="#B7A79A"
+            android:fontFamily="@font/paperlogy_6"
+            android:textCursorDrawable="@null" />
 
-            android:textSize="17dp" />
-
-        <!-- 오류 메시지 -->
         <TextView
             android:id="@+id/tvGroupError"
-            android:layout_width="wrap_content"
+            android:layout_width="280dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
             android:layout_marginTop="6dp"
             android:text="모든 칸을 채워주세요!"
             android:textColor="#8B4513"
             android:textSize="12sp"
             android:paddingStart="10dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
-        <!-- 로그인 버튼 -->
         <android.widget.Button
             android:id="@+id/sendIdToEmail"
             android:layout_width="280dp"
@@ -104,10 +115,7 @@
             android:background="@drawable/login_button_bg"
             android:text="이메일로 아이디 전송"
             android:textColor="#FFFFFF"
-            android:textSize="20dp" />
-
+            android:textSize="23sp" />
     </LinearLayout>
-
-
 
 </LinearLayout>

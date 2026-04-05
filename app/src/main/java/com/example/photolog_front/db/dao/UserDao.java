@@ -20,4 +20,7 @@ public interface UserDao {
 
     @Query("DELETE FROM users WHERE id = :id")
     void deleteById(long id);
+
+    @Query("UPDATE users SET passwordHash = :newPasswordHash WHERE username = :username")
+    int updatePasswordByUsername(String username, String newPasswordHash);
 }

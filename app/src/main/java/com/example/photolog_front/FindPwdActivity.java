@@ -8,8 +8,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Locale;
+import java.util.Random;
 
 public class FindPwdActivity extends AppCompatActivity {
 
@@ -17,6 +21,10 @@ public class FindPwdActivity extends AppCompatActivity {
     private TextView tvLogin, tvFindId, tvPwdError;
     private Button goFindPwdButton, btnSendCode;
     private EditText etEmail, etUserId, etCode;
+
+    // 개발용 mock 인증번호
+    private String sentCode = null;
+    private boolean isCodeSent = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +88,19 @@ public class FindPwdActivity extends AppCompatActivity {
 
         hideError();
 
-        // 실제 인증번호 발송 로직이 있다면 여기 추가
-        // 지금은 화면 흐름만 막아두기 위한 처리
+        // mock 인증번호 생성
+        sentCode = generateVerificationCode();
+        isCodeSent = true;
+
+        // 개발용 안내
+        Toast.makeText(
+                this,
+                "인증번호가 발송되었습니다. [테스트용: " + sentCode + "]",
+                Toast.LENGTH_LONG
+        ).show();
+
+        // 필요하면 버튼 텍스트 변경
+        btnSendCode.setText("인증번호 재발송");
     }
 
     private void handleFindPwd() {
@@ -99,15 +118,32 @@ public class FindPwdActivity extends AppCompatActivity {
             return;
         }
 
+        if (!isCodeSent || sentCode == null) {
+            showError("먼저 인증번호를 발송해주세요.");
+            return;
+        }
+
         if (code.length() != 6) {
             showError("인증번호 6자리를 입력해주세요.");
+            return;
+        }
+
+        if (!code.equals(sentCode)) {
+            showError("인증번호가 일치하지 않습니다.");
             return;
         }
 
         hideError();
 
         Intent intent = new Intent(FindPwdActivity.this, RePwdActivity.class);
+        intent.putExtra("userId", userId);
+        intent.putExtra("email", email);
         startActivity(intent);
+    }
+
+    private String generateVerificationCode() {
+        int number = new Random().nextInt(900000) + 100000; // 100000 ~ 999999
+        return String.format(Locale.getDefault(), "%06d", number);
     }
 
     private void showError(String message) {

@@ -209,8 +209,13 @@ public class FamilyDiaryActivity extends AppCompatActivity {
 
         ImageView img = new ImageView(this);
         int size = (int) (getResources().getDisplayMetrics().density * 90);
+        android.widget.LinearLayout.LayoutParams imgParams =
+                new android.widget.LinearLayout.LayoutParams(size, size);
+        img.setLayoutParams(imgParams);
         img.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        img.setLayoutParams(new android.widget.LinearLayout.LayoutParams(size, size));
+
+        img.setBackgroundResource(R.drawable.rounded_image_bg);
+        img.setClipToOutline(true);
 
         if (diary.photoUri != null && !diary.photoUri.trim().isEmpty()) {
             try {

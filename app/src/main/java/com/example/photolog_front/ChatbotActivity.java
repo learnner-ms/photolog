@@ -96,7 +96,7 @@ public class ChatbotActivity extends AppCompatActivity {
         btnMic = findViewById(R.id.btn_mic);
         btnFinishChat = findViewById(R.id.btn_finish_chat);
 
-        btnFinishChat.setText("일기 생성하기");
+        btnFinishChat.setText("일기 생성");
         btnFinishChat.setVisibility(View.INVISIBLE);
         btnFinishChat.setEnabled(false);
     }

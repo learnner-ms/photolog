@@ -10,312 +10,335 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="30dp"
-        android:paddingTop="50dp"
         android:paddingBottom="32dp">
 
+        <!-- 상단 바 -->
         <LinearLayout
-            android:id="@+id/layout_logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textColor="#5D3316"
-                android:textSize="32sp"
-                android:fontFamily="@font/paperlogy_7" />
-
-            <ImageView
-                android:layout_width="52sp"
-                android:layout_height="52sp"
-                android:layout_margin="2dp"
-                android:src="@drawable/photolog_logo" />
-        </LinearLayout>
-
-        <TextView
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="40dp"
-            android:gravity="center_horizontal"
-            android:text="회원 가입"
-            android:textColor="#5C3A22"
-            android:textSize="35sp"
-            android:fontFamily="@font/paperlogy_7"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/signName"
-            android:layout_width="280dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/edittext_bg"
-            android:hint="이름"
-            android:inputType="textPersonName"
-            android:padding="10dp"
-            android:textSize="17sp"
-            android:textColor="#5D3316"
-            android:textColorHint="#B7A79A"
-            android:fontFamily="@font/paperlogy_6"
-            android:textCursorDrawable="@null" />
-
-        <EditText
-            android:id="@+id/signId"
-            android:layout_width="280dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/edittext_bg"
-            android:hint="아이디"
-            android:inputType="text"
-            android:padding="10dp"
-            android:textSize="17sp"
-            android:textColor="#5D3316"
-            android:textColorHint="#B7A79A"
-            android:fontFamily="@font/paperlogy_6"
-            android:textCursorDrawable="@null" />
-
-        <EditText
-            android:id="@+id/signPwd"
-            android:layout_width="280dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/edittext_bg"
-            android:hint="비밀번호"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            android:textSize="17sp"
-            android:textColor="#5D3316"
-            android:textColorHint="#B7A79A"
-            android:fontFamily="@font/paperlogy_6"
-            android:textCursorDrawable="@null" />
-
-        <EditText
-            android:id="@+id/signPwdCheck"
-            android:layout_width="280dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/edittext_bg"
-            android:hint="비밀번호 재입력"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            android:textSize="17sp"
-            android:textColor="#5D3316"
-            android:textColorHint="#B7A79A"
-            android:fontFamily="@font/paperlogy_6"
-            android:textCursorDrawable="@null" />
-
-        <TextView
-            android:id="@+id/tvPasswordGuide"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:text="비밀번호는 8~20자, 영문/숫자/특수문자를 포함해야 합니다."
-            android:textColor="#8B5A2B"
-            android:textSize="12sp"
-            android:fontFamily="@font/paperlogy_6" />
-
-        <TextView
-            android:id="@+id/tvError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_gravity="start"
-            android:paddingLeft="40dp"
-            android:text="오류 메시지"
-            android:textColor="#8B4513"
-            android:textSize="12sp"
-            android:fontFamily="@font/paperlogy_6"
-            android:visibility="gone" />
-
-        <!-- 전체 동의 카드 -->
-        <LinearLayout
-            android:id="@+id/layoutAllTerms"
-            android:layout_width="320dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_terms_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
+            android:paddingTop="40dp"
+            android:paddingBottom="10dp"
+            android:paddingHorizontal="24dp"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp">
+            android:gravity="center_vertical">
 
-            <CheckBox
-                android:id="@+id/chkAll"
+            <LinearLayout
+                android:id="@+id/layout_logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:clickable="false"
-                android:focusable="false"
-                app:buttonTint="@color/checkbox_tint" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="#5D3316"
+                    android:textSize="32sp"
+                    android:fontFamily="@font/paperlogy_7" />
+
+                <ImageView
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="2dp"
+                    android:src="@drawable/photolog_logo" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- 본문 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="30dp">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="포토로그 전체약관에 동의합니다."
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="28dp"
+                android:gravity="center_horizontal"
+                android:text="회원 가입"
                 android:textColor="#5C3A22"
+                android:textSize="35sp"
+                android:fontFamily="@font/paperlogy_7"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/signName"
+                android:layout_width="280dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/edittext_bg"
+                android:hint="이름"
+                android:inputType="textPersonName"
+                android:padding="10dp"
                 android:textSize="17sp"
-                android:textStyle="bold"
-                android:fontFamily="@font/paperlogy_7" />
-        </LinearLayout>
+                android:textColor="#5D3316"
+                android:textColorHint="#B7A79A"
+                android:fontFamily="@font/paperlogy_6"
+                android:textCursorDrawable="@null" />
 
-        <!-- 이용약관 -->
-        <LinearLayout
-            android:id="@+id/layoutUseTerms"
-            android:layout_width="320dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/bg_terms_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="12dp">
+            <EditText
+                android:id="@+id/signId"
+                android:layout_width="280dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_bg"
+                android:hint="아이디"
+                android:inputType="text"
+                android:padding="10dp"
+                android:textSize="17sp"
+                android:textColor="#5D3316"
+                android:textColorHint="#B7A79A"
+                android:fontFamily="@font/paperlogy_6"
+                android:textCursorDrawable="@null" />
 
-            <CheckBox
-                android:id="@+id/chkUse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="false"
-                android:focusable="false"
-                app:buttonTint="@color/checkbox_tint" />
+            <EditText
+                android:id="@+id/signPwd"
+                android:layout_width="280dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_bg"
+                android:hint="비밀번호"
+                android:inputType="textPassword"
+                android:padding="10dp"
+                android:textSize="17sp"
+                android:textColor="#5D3316"
+                android:textColorHint="#B7A79A"
+                android:fontFamily="@font/paperlogy_6"
+                android:textCursorDrawable="@null" />
+
+            <EditText
+                android:id="@+id/signPwdCheck"
+                android:layout_width="280dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edittext_bg"
+                android:hint="비밀번호 재입력"
+                android:inputType="textPassword"
+                android:padding="10dp"
+                android:textSize="17sp"
+                android:textColor="#5D3316"
+                android:textColorHint="#B7A79A"
+                android:fontFamily="@font/paperlogy_6"
+                android:textCursorDrawable="@null" />
 
             <TextView
-                android:id="@+id/tvTermsUse"
-                android:layout_width="0dp"
+                android:id="@+id/tvPasswordGuide"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="포토로그 이용약관 동의 (필수)"
-                android:textColor="#5C3A22"
-                android:textSize="16sp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:text="비밀번호는 8~20자, 영문/숫자/특수문자를 포함해야 합니다."
+                android:textColor="#8B5A2B"
+                android:textSize="12sp"
                 android:fontFamily="@font/paperlogy_6" />
 
             <TextView
-                android:id="@+id/tvViewUse"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvError"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:text="보기"
-                android:textColor="#8B5A2B"
-                android:textSize="13sp"
+                android:layout_marginTop="6dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingStart="10dp"
+                android:text="오류 메시지"
+                android:textColor="#8B4513"
+                android:textSize="12sp"
+                android:fontFamily="@font/paperlogy_6"
+                android:visibility="gone" />
+
+            <!-- 전체 동의 카드 -->
+            <LinearLayout
+                android:id="@+id/layoutAllTerms"
+                android:layout_width="320dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_terms_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <CheckBox
+                    android:id="@+id/chkAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    app:buttonTint="@color/checkbox_tint" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="포토로그 전체약관에 동의합니다."
+                    android:textColor="#5C3A22"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/paperlogy_7" />
+            </LinearLayout>
+
+            <!-- 이용약관 -->
+            <LinearLayout
+                android:id="@+id/layoutUseTerms"
+                android:layout_width="320dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/bg_terms_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <CheckBox
+                    android:id="@+id/chkUse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    app:buttonTint="@color/checkbox_tint" />
+
+                <TextView
+                    android:id="@+id/tvTermsUse"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="포토로그 이용약관 동의 (필수)"
+                    android:textColor="#5C3A22"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/paperlogy_6" />
+
+                <TextView
+                    android:id="@+id/tvViewUse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="보기"
+                    android:textColor="#8B5A2B"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/paperlogy_7" />
+            </LinearLayout>
+
+            <!-- 개인정보 처리방침 -->
+            <LinearLayout
+                android:id="@+id/layoutPrivacyTerms"
+                android:layout_width="320dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/bg_terms_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <CheckBox
+                    android:id="@+id/chkPrivacy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    app:buttonTint="@color/checkbox_tint" />
+
+                <TextView
+                    android:id="@+id/tvTermsPrivacy"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="개인정보 처리방침 (필수)"
+                    android:textColor="#5C3A22"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/paperlogy_6" />
+
+                <TextView
+                    android:id="@+id/tvViewPrivacy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="보기"
+                    android:textColor="#8B5A2B"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/paperlogy_7" />
+            </LinearLayout>
+
+            <!-- 광고 수신 -->
+            <LinearLayout
+                android:id="@+id/layoutAdTerms"
+                android:layout_width="320dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/bg_terms_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <CheckBox
+                    android:id="@+id/chkAd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    app:buttonTint="@color/checkbox_tint" />
+
+                <TextView
+                    android:id="@+id/tvTermsAd"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="맞춤형 광고 정보 수신 동의 (선택)"
+                    android:textColor="#5C3A22"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/paperlogy_6" />
+
+                <TextView
+                    android:id="@+id/tvViewAd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="보기"
+                    android:textColor="#8B5A2B"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/paperlogy_7" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSignup"
+                android:layout_width="280dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/login_button_bg"
+                android:backgroundTint="@null"
+                android:text="회원 가입"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
                 android:textStyle="bold"
-                android:fontFamily="@font/paperlogy_7" />
+                android:fontFamily="@font/paperlogy_7"
+                app:backgroundTint="@null" />
+
         </LinearLayout>
-
-        <!-- 개인정보 처리방침 -->
-        <LinearLayout
-            android:id="@+id/layoutPrivacyTerms"
-            android:layout_width="320dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/bg_terms_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="12dp">
-
-            <CheckBox
-                android:id="@+id/chkPrivacy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="false"
-                android:focusable="false"
-                app:buttonTint="@color/checkbox_tint" />
-
-            <TextView
-                android:id="@+id/tvTermsPrivacy"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="개인정보 처리방침 (필수)"
-                android:textColor="#5C3A22"
-                android:textSize="16sp"
-                android:fontFamily="@font/paperlogy_6" />
-
-            <TextView
-                android:id="@+id/tvViewPrivacy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="보기"
-                android:textColor="#8B5A2B"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:fontFamily="@font/paperlogy_7" />
-        </LinearLayout>
-
-        <!-- 광고 수신 -->
-        <LinearLayout
-            android:id="@+id/layoutAdTerms"
-            android:layout_width="320dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/bg_terms_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="12dp">
-
-            <CheckBox
-                android:id="@+id/chkAd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="false"
-                android:focusable="false"
-                app:buttonTint="@color/checkbox_tint" />
-
-            <TextView
-                android:id="@+id/tvTermsAd"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="맞춤형 광고 정보 수신 동의 (선택)"
-                android:textColor="#5C3A22"
-                android:textSize="16sp"
-                android:fontFamily="@font/paperlogy_6" />
-
-            <TextView
-                android:id="@+id/tvViewAd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="보기"
-                android:textColor="#8B5A2B"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:fontFamily="@font/paperlogy_7" />
-        </LinearLayout>
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnSignup"
-            android:layout_width="280dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/login_button_bg"
-            android:backgroundTint="@null"
-            android:text="회원 가입"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/paperlogy_7"
-            app:backgroundTint="@null" />
 
     </LinearLayout>
 </ScrollView>

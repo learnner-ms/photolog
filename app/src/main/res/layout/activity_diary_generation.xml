@@ -8,80 +8,96 @@
     android:background="#FFEEE0"
     tools:context=".DiaryGenerationActivity">
 
+    <!-- 상단 바 -->
     <LinearLayout
-        android:id="@+id/layout_logo"
-        android:layout_width="wrap_content"
+        android:id="@+id/top_bar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:gravity="center_vertical"
-        android:layout_margin="16dp"
+        android:paddingTop="40dp"
+        android:paddingBottom="10dp"
+        android:paddingHorizontal="24dp"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-        <TextView
-            android:id="@+id/app_name"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/layout_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textSize="32sp"
-            android:textColor="#5D3316"
-            android:fontFamily="@font/paperlogy_7"
-            />
-        <ImageView
-            android:id="@+id/img_logo"
-            android:layout_width="52sp"
-            android:layout_height="52sp"
-            android:src="@drawable/photolog_logo"
-            android:contentDescription="@string/app_logo_desc"
-            android:layout_margin="2dp"
-            />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/app_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textSize="32sp"
+                android:textColor="#5D3316"
+                android:fontFamily="@font/paperlogy_7" />
+
+            <ImageView
+                android:id="@+id/img_logo"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="2dp"
+                android:src="@drawable/photolog_logo"
+                android:contentDescription="@string/app_logo_desc" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/tv_guide"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="28dp"
+        android:layout_marginTop="20dp"
         android:fontFamily="@font/paperlogy_7"
         android:gravity="start"
         android:text="오늘의 일기 생성을 위해\n오늘의 사진을 업로드 해주세요."
         android:textColor="#5D3316"
         android:textSize="28sp"
-        android:layout_marginHorizontal="28dp"
-        android:layout_marginTop="25dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_logo"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <View
         android:id="@+id/separator_top"
         android:layout_width="0dp"
         android:layout_height="2dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="24dp"
         android:background="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_guide"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_guide" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/img_placeholder"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="H, 1:1"
-        android:src="@drawable/ic_img_placeholder"
-        android:scaleType="centerCrop"
-        android:clickable="true"
-        android:focusable="true"
-        android:adjustViewBounds="true"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         android:layout_marginHorizontal="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:adjustViewBounds="true"
+        android:clickable="true"
+        android:focusable="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_img_placeholder"
+        app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintTop_toBottomOf="@id/separator_top"
-        app:layout_constraintBottom_toTopOf="@id/separator_bottom" />
+        app:layout_constraintBottom_toTopOf="@id/separator_bottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <View
         android:id="@+id/separator_bottom"
@@ -89,9 +105,9 @@
         android:layout_height="2dp"
         android:layout_marginBottom="230dp"
         android:background="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_select_photo"
@@ -100,15 +116,15 @@
         android:layout_marginHorizontal="40dp"
         android:layout_marginTop="40dp"
         android:background="@drawable/button_background"
-        android:fontFamily="@font/paperlogy_7"
-        android:paddingVertical="5dp"
         android:clickable="true"
         android:focusable="true"
+        android:fontFamily="@font/paperlogy_7"
+        android:paddingVertical="5dp"
         android:text="사진 선택"
         android:textColor="#5D3316"
         android:textSize="34sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separator_bottom"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/separator_bottom"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

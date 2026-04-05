@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     private void showEmptyMyDiary() {
         tvDiaryTitle.setText("아직 작성된 일기가 없어요!");
         tvDiaryDate.setText("");
-        tvDiaryContent.setText("새로 일기를 작성하러 가볼까요?");
+        tvDiaryContent.setText("새로 일기를 작성하고 나만의 일상을 기록해보세요!");
         imgDiary.setImageResource(R.drawable.sample);
     }
 
