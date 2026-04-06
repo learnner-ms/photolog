@@ -130,17 +130,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:id="@+id/tvTermsContent"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/paperlogy_6"
-            android:lineSpacingExtra="6dp"
-            android:paddingHorizontal="20dp"
-            android:paddingVertical="16dp"
-            android:text="약관 본문"
-            android:textColor="#5D3316"
-            android:textSize="20sp" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/layoutTermsContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingBottom="24dp" />
+        </ScrollView>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
