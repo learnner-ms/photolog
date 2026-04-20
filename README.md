@@ -29,19 +29,19 @@ Photolog는 사진을 기반으로 사용자와 AI가 대화를 나누고,
 
 ### 1. 사진 기반 AI 대화
 - 사진을 기반으로 AI와 대화 진행
-- 음성 인식을 통해 텍스트 입력 자동 변환 :contentReference[oaicite:1]{index=1}  
+- 음성 인식을 통해 텍스트 입력 자동 변환 
 
 ---
 
 ### 2. AI 일기 자동 생성
 - 대화 내용을 기반으로 일기 생성
-- 날짜, 장소, 인물, 감정, 사건 등 정보 구조화 :contentReference[oaicite:2]{index=2}  
+- 날짜, 장소, 인물, 감정, 사건 등 정보 구조화 
 
 ---
 
 ### 3. 가족 공유 기능
 - 생성된 일기를 가족 그룹과 공유
-- 댓글 및 커뮤니티 기능 제공 :contentReference[oaicite:3]{index=3}  
+- 댓글 및 커뮤니티 기능 제공 
 
 ---
 
@@ -50,7 +50,7 @@ Photolog는 사진을 기반으로 사용자와 AI가 대화를 나누고,
 ### ✔ Backend 대체 구조
 기존 서버 의존 구조를 제거하고  
 Mock API + Room DB 기반 구조로 변경하여  
-서버 없이도 동작 가능한 환경을 구현하였습니다. :contentReference[oaicite:4]{index=4}  
+서버 없이도 동작 가능한 환경을 구현하였습니다. 
 
 - Mock API → AI 응답 및 서비스 흐름 처리  
 - Room DB → 사용자 / 일기 / 채팅 데이터 저장  
@@ -64,14 +64,14 @@ Mock API + Room DB 기반 구조로 변경하여
 - AI 기능 사용 전 사전 동의 절차 구현  
 - 개인정보 처리방침 및 약관 구조 설계  
 - 사용자 데이터 삭제 기능 제공  
-- 비밀번호 해시 및 salt 기반 암호화 적용 :contentReference[oaicite:5]{index=5}  
+- 비밀번호 해시 및 salt 기반 암호화 적용 
 
 ---
 
 ## 결과 및 성과
 - AI 기능과 개인정보 보호 구조 결합  
 - Mock Backend 기반 실제 서비스 흐름 구현  
-- 사용자 데이터 통제 기능 확보 :contentReference[oaicite:6]{index=6}  
+- 사용자 데이터 통제 기능 확보
 
 ---
 
